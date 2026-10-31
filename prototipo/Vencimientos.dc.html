@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vencimientos y avisos</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B57A4}a:hover{color:#08427D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F3F5F7; color: #15202B; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 18px; overflow: hidden">
+
+<div style="display: flex; align-items: center; height: 60px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D5DCE3">
+<a href="Mas.dc.html" style="display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 8px; color: #0B57A4; text-decoration: none; font-weight: 700">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Más</a>
+</div>
+
+<div style="flex: 1; overflow-y: auto; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700">Vencimientos</h1>
+<span style="color: #4A5866">{{resumen}}</span>
+</div>
+
+<sc-for list="{{items}}" as="item" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 10px; background: {{item.cardBg}}; border: 2px solid {{item.border}}; border-radius: 14px; padding: 14px 16px">
+<div style="display: flex; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-weight: 700; font-size: 20px">{{item.nombre}}</span>
+<span style="font-size: 16px; color: {{item.cuandoColor}}; font-weight: 700">{{item.cuando}}</span>
+<span style="font-size: 15px; color: #4A5866">{{item.nota}}</span>
+</div>
+<span style="font-weight: 700; font-size: 20px; white-space: nowrap">{{item.importe}}</span>
+</div>
+<sc-if value="{{item.pendiente}}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button type="button" onClick="{{item.pagar}}" style="height: 48px; border-radius: 12px; border: 0; background: #0B57A4; color: #FFFFFF; font: inherit; font-weight: 700; cursor: pointer">{{item.accion}}</button>
+<button type="button" onClick="{{item.posponer}}" style="height: 48px; border-radius: 12px; border: 2px solid #D5DCE3; background: #FFFFFF; color: #15202B; font: inherit; font-weight: 700; cursor: pointer">Avisame mañana</button>
+</div>
+</sc-if>
+<sc-if value="{{item.hecho}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 8px; color: #1B6E3F; font-weight: 700">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>{{item.hechoText}}</div>
+</sc-if>
+</div>
+</sc-for>
+
+<div style="display: flex; flex-direction: column; gap: 6px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 14px 16px">
+<span style="font-size: 16px; color: #4A5866; font-weight: 700">Aguinaldo de diciembre</span>
+<span style="font-size: 24px; font-weight: 700">$ 18.500 <span style="font-size: 16px; font-weight: 400; color: #4A5866">estimado</span></span>
+<span style="font-size: 16px; color: #4A5866">Se va calculando con lo que pagaste a los empleados este semestre. Confirmalo con el contador.</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 14px 16px">
+<span style="font-size: 16px; color: #4A5866; font-weight: 700">Cómo te aviso</span>
+<span>3 días antes y el mismo día del vencimiento.</span>
+<sc-for list="{{canales}}" as="item" hint-placeholder-count="2">
+<button type="button" onClick="{{item.toggle}}" aria-pressed="{{item.on}}" style="display: flex; justify-content: space-between; align-items: center; min-height: 56px; padding: 0 4px; border: 0; background: none; color: #15202B; font: inherit; cursor: pointer; text-align: left">
+<span>{{item.label}}</span>
+<span style="display: flex; align-items: center; width: 56px; height: 32px; border-radius: 16px; background: {{item.track}}; padding: 3px; box-sizing: border-box; justify-content: {{item.align}}"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF"></span></span>
+</button>
+</sc-for>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { estado: {}, push: true, mail: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const base = [
+      { id: 'antel', nombre: 'Antel', cuando: 'Venció el viernes 16', nivel: 'rojo', nota: 'Servicio', importe: '$ 1.900', accion: 'Ya lo pagué' },
+      { id: 'seguro', nombre: 'Seguro Móvil 1', cuando: 'Vence mañana', nivel: 'amarillo', nota: 'Gasto del coche', importe: '$ 4.200', accion: 'Ya lo pagué' },
+      { id: 'ose', nombre: 'OSE', cuando: 'Vence el sábado 24', nivel: 'normal', nota: 'Importe estimado, confirmá cuando llegue la factura', importe: '$ 1.150', accion: 'Ya lo pagué' },
+      { id: 'cuota', nombre: 'Cuota Móvil 2', cuando: 'Vence el domingo 25', nivel: 'normal', nota: 'Cuota 14 de 36', importe: '$ 9.800', accion: 'Ya la pagué' },
+      { id: 'bps', nombre: 'BPS', cuando: 'Falta cargar la fecha de este mes', nivel: 'amarillo', nota: 'La fecha la cargás vos o el contador', importe: '—', accion: 'Cargar fecha' }
+    ];
+    const colors = {
+      rojo: { border: '#B3261E', bg: '#FFFFFF', text: '#B3261E' },
+      amarillo: { border: '#E8C67A', bg: '#FFFFFF', text: '#8A5300' },
+      normal: { border: '#D5DCE3', bg: '#FFFFFF', text: '#4A5866' }
+    };
+    const set = (id, val) => { const e = Object.assign({}, s.estado); e[id] = val; this.setState({ estado: e }); };
+    let vencidos = 0, pend = 0;
+    const items = base.map((it) => {
+      const st = s.estado[it.id];
+      const c = st ? { border: '#D5DCE3', bg: '#F7F9FA', text: '#4A5866' } : colors[it.nivel];
+      if (!st && it.nivel === 'rojo') vencidos++;
+      if (!st) pend++;
+      return {
+        nombre: it.nombre, cuando: it.cuando, nota: it.nota, importe: it.importe, accion: it.accion,
+        cardBg: c.bg, border: c.border, cuandoColor: c.text,
+        pendiente: !st, hecho: !!st,
+        hechoText: st === 'pagado' ? (it.id === 'bps' ? 'Fecha cargada' : 'Pagado. Quedó registrado como gasto.') : 'Te aviso mañana de nuevo',
+        pagar: () => set(it.id, 'pagado'),
+        posponer: () => set(it.id, 'pospuesto')
+      };
+    });
+    const canales = [
+      { key: 'push', label: 'Notificación en el celular', on: s.push },
+      { key: 'mail', label: 'Resumen por email cada mañana', on: s.mail }
+    ].map((ch) => ({
+      label: ch.label, on: ch.on,
+      track: ch.on ? '#0B57A4' : '#9AA7B4',
+      align: ch.on ? 'flex-end' : 'flex-start',
+      toggle: () => { const p = {}; p[ch.key] = !ch.on; this.setState(p); }
+    }));
+    let resumen = pend === 0 ? 'Todo al día' : '';
+    if (vencidos) resumen += vencidos + (vencidos === 1 ? ' vencido' : ' vencidos');
+    if (pend - vencidos > 0) resumen += (resumen ? ' · ' : '') + (pend - vencidos) + ' por vencer o por completar';
+    return { items: items, canales: canales, resumen: resumen };
+  }
+}
+</script>
+</body>
+</html>
