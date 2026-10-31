@@ -5,6 +5,7 @@ import { api, mensajeDeError } from "../api";
 import { useAjustes } from "../ajustes";
 import { Aviso, Boton, Pantalla, Tarjeta } from "../componentes";
 import { fechaCorta, haceDias, pesos, useCargar } from "../datos";
+import { FotosComprobante } from "../fotos";
 import type { FichaCliente, ItemHistorial } from "../tipos";
 import { COLOR_NIVEL } from "./QuienDebe";
 
@@ -194,6 +195,9 @@ function FilaHistorial({ item, alAnular }: { item: ItemHistorial; alAnular: () =
         <span className="text-base font-bold text-verde">{pesos(item.a_favor ?? 0)} a favor</span>
       )}
       {item.anulado && <span className="text-base font-bold text-rojo">Anulado: {item.motivo_anulacion}</span>}
+      {item.tipo === "cobro" && !item.anulado && item.origen === "normal" && (
+        <FotosComprobante tabla="cobro" registroId={item.id} fotos={item.comprobantes ?? []} alCambiar={alAnular} />
+      )}
       {!item.anulado && !anulando && (
         <button type="button" onClick={() => setAnulando(true)} className="min-h-12 self-start text-base font-bold text-azul">
           Anular…

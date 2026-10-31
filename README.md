@@ -118,6 +118,18 @@ Pantallas: **Quién debe** (total, colores por antigüedad, búsqueda), **ficha 
 
 **Listo cuando** (especificación §8): las pruebas de fiados pasan (`apps/api/test/fiados.test.ts`, casos 1–7, 14, 15 y 20) y **dos hojas reales de prueba coinciden con el papel**. Esto último lo tiene que hacer el dueño con dos hojas suyas, en la base de prueba.
 
+## Fotos de comprobantes (R2 + Cloudflare Images)
+
+En la ficha del cliente, cada cobro tiene "Agregar foto del comprobante", y al terminar un cobro por transferencia la app ofrece sacarle foto.
+
+1. **En el celular** la foto se achica antes de subir (1.600 px como máximo, JPEG): ~40–300 KB.
+2. **En el Worker** (`apps/api/src/servicios/comprobantes.ts`): se valida que sea JPEG, PNG o WebP por sus primeros bytes (no por lo que diga el navegador), máximo 5 MB. Images se usa **una sola vez por foto**: guarda una copia normalizada (sin datos ocultos como el GPS) y una miniatura de 320 px, las dos en R2. Verlas no vuelve a usar Images, así que el uso queda muy lejos de las 5.000 transformaciones gratis por mes. Si Images falla o se pasa del límite, se guarda la foto tal cual, sin miniatura.
+3. **Privadas**: el bucket no es público; las fotos solo se ven con la sesión del dueño (`GET /api/comprobantes/:id/foto|miniatura`). Nada se borra: una foto equivocada se anula con motivo y queda en R2 y en la auditoría.
+4. **Tabla** `comprobante` (migración 0004): de qué registro es (`cobro` o `gasto`, listo para la Etapa 6), clave en R2, tamaño y medidas.
+5. **En local** R2 e Images se simulan (`wrangler dev`, pruebas): no tocan la cuenta ni cuestan.
+
+Activación en producción y límites gratis: `docs/despliegue.md`, sección "Fotos de comprobantes".
+
 ## Copias y restauración
 
 Las copias son `pg_dump` en formato custom, cifradas con [age](https://age-encryption.org). Para cifrar alcanza la clave pública; la privada solo hace falta para restaurar y **nunca va a GitHub ni al servidor**.

@@ -29,6 +29,13 @@
       "when": 1793414492781,
       "tag": "0003_vistas_saldos",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793472089789,
+      "tag": "0004_comprobantes",
+      "breakpoints": true
     }
   ]
 }
