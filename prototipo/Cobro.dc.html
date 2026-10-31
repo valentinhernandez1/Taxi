@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Anotar cobro</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B57A4}a:hover{color:#08427D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F3F5F7; color: #15202B; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 18px; overflow: hidden">
+
+<div style="display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D5DCE3">
+<sc-if value="{{showBack}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{back}}" style="display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 8px; border: 0; background: none; color: #0B57A4; font: inherit; font-weight: 700; cursor: pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Atrás</button>
+</sc-if>
+<sc-if value="{{showCancel}}" hint-placeholder-val="{{ true }}">
+<a href="Main.dc.html" style="display: flex; align-items: center; height: 48px; padding: 0 8px; color: #0B57A4; text-decoration: none; font-weight: 700">Cancelar</a>
+</sc-if>
+<span style="font-weight: 700">Anotar cobro</span>
+<span style="min-width: 88px; text-align: right; padding-right: 8px; font-size: 16px; color: #4A5866">{{progress}}</span>
+</div>
+
+<div style="flex: 1; overflow-y: auto; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 16px">
+
+<sc-if value="{{isCliente}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Quién pagó?</h1>
+<span style="color: #4A5866">Al lado ves cuánto debe ahora.</span>
+</div>
+<label for="buscar-cobro" style="font-size: 16px; color: #4A5866; font-weight: 700">Buscar</label>
+<input id="buscar-cobro" type="search" placeholder="Escribí el nombre" style="height: 52px; border: 2px solid #D5DCE3; border-radius: 12px; padding: 0 16px; font-size: 18px; font-family: inherit; background: #FFFFFF; color: #15202B">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{clientes}}" as="item" hint-placeholder-count="4">
+<button type="button" onClick="{{item.pick}}" style="display: flex; justify-content: space-between; align-items: center; min-height: 64px; padding: 0 18px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer; text-align: left">
+<span>{{item.label}}</span><span style="font-size: 18px; color: {{item.color}}">{{item.saldoText}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isImporte}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Cuánto pagó?</h1>
+<span style="color: #4A5866">{{cliente}} debe {{saldoText}}.</span>
+</div>
+<div aria-live="polite" style="background: #FFFFFF; border: 2px solid {{montoBorder}}; border-radius: 14px; padding: 14px 18px; font-size: 40px; font-weight: 700; text-align: right">{{montoText}}</div>
+<sc-if value="{{hasError}}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="background: #FCE8E6; color: #B3261E; border-radius: 12px; padding: 12px 14px; font-weight: 700">{{errorText}}</div>
+</sc-if>
+<button type="button" onClick="{{pagoTodo}}" style="height: 52px; border-radius: 12px; border: 2px solid #1B6E3F; background: #FFFFFF; color: #1B6E3F; font: inherit; font-weight: 700; cursor: pointer">Pagó todo ({{saldoText}})</button>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{keys}}" as="item" hint-placeholder-count="12">
+<button type="button" onClick="{{item.press}}" aria-label="{{item.aria}}" style="height: 56px; border-radius: 12px; border: 1px solid #D5DCE3; background: #FFFFFF; color: #15202B; font: inherit; font-size: {{item.size}}; font-weight: 700; cursor: pointer">{{item.label}}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{nextImporte}}" disabled="{{cantNext}}" style="height: 60px; border-radius: 14px; border: 0; background: {{nextBg}}; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Siguiente</button>
+</sc-if>
+
+<sc-if value="{{isMedio}}" hint-placeholder-val="{{ false }}">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Cómo pagó?</h1>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{medios}}" as="item" hint-placeholder-count="2">
+<button type="button" onClick="{{item.pick}}" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-height: 72px; padding: 0 18px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; cursor: pointer; text-align: left">
+<span style="font-size: 20px; font-weight: 700">{{item.label}}</span><span style="font-size: 16px; color: #4A5866">{{item.sub}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isQuien}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Quién recibió la plata?</h1>
+<span style="color: #4A5866">Si no fuiste vos, esa persona te la tiene que entregar.</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{quienes}}" as="item" hint-placeholder-count="6">
+<button type="button" onClick="{{item.pick}}" style="min-height: 68px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; font-size: 19px; font-weight: 700; cursor: pointer">{{item.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isDia}}" hint-placeholder-val="{{ false }}">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Qué día pagó?</h1>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{dias}}" as="item" hint-placeholder-count="3">
+<button type="button" onClick="{{item.pick}}" style="display: flex; justify-content: space-between; align-items: center; min-height: 64px; padding: 0 18px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer; text-align: left">
+<span>{{item.label}}</span><span style="font-size: 16px; font-weight: 400; color: #4A5866">{{item.sub}}</span></button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isResumen}}" hint-placeholder-val="{{ false }}">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Está bien?</h1>
+<div style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 18px">
+<div style="font-size: 20px; font-weight: 700; line-height: 1.35">{{frase}}</div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #E6EAEE; padding-top: 12px"><span style="color: #4A5866">Le queda debiendo</span><span style="font-weight: 700">{{quedaText}}</span></div>
+<div style="color: #15202B">{{efecto}}</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 16px">
+<span style="font-size: 16px; color: #4A5866; font-weight: 700">Se descuenta de lo más viejo</span>
+<sc-for list="{{aplica}}" as="item" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between"><span>Viaje del {{item.fecha}}</span><span style="font-weight: 700">{{item.text}}</span></div>
+</sc-for>
+</div>
+<button type="button" onClick="{{guardar}}" style="height: 60px; border-radius: 14px; border: 0; background: #0B57A4; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Guardar cobro</button>
+<button type="button" onClick="{{corregir}}" style="height: 48px; border: 0; background: none; color: #0B57A4; font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline">Corregir algo</button>
+</sc-if>
+
+<sc-if value="{{isListo}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 60px; text-align: center">
+<div style="width: 88px; height: 88px; border-radius: 44px; background: #E5F3EA; display: flex; align-items: center; justify-content: center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1B6E3F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
+</div>
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">Cobro guardado</h1>
+<span style="color: #4A5866">{{listoText}}</span>
+</div>
+<a href="Main.dc.html" style="display: flex; align-items: center; justify-content: center; height: 60px; border-radius: 14px; background: #0B57A4; color: #FFFFFF; text-decoration: none; font-size: 20px; font-weight: 700">Volver al inicio</a>
+<button type="button" onClick="{{reiniciar}}" style="height: 60px; border-radius: 14px; border: 2px solid #0B57A4; background: #FFFFFF; color: #0B57A4; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Anotar otro cobro</button>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 'cliente', cliente: null, monto: '', medio: null, quien: null, dia: null };
+  }
+  renderVals() {
+    const s = this.state;
+    const fmtN = (n) => '$ ' + String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const data = {
+      'Rodríguez': [{ fecha: '7 de agosto', d: 300 }, { fecha: '22 de agosto', d: 600 }, { fecha: '3 de octubre', d: 400 }],
+      'Almacén La Esquina': [{ fecha: '7 de setiembre', d: 1200 }, { fecha: '20 de setiembre', d: 1250 }],
+      'Fernández': [{ fecha: '6 de octubre', d: 500 }, { fecha: '17 de octubre', d: 300 }],
+      'Martínez': [{ fecha: '13 de octubre', d: 650 }]
+    };
+    const colores = { 'Rodríguez': '#B3261E', 'Almacén La Esquina': '#8A5300', 'Fernández': '#4A5866', 'Martínez': '#4A5866' };
+    const saldoDe = (c) => (data[c] || []).reduce((a, x) => a + x.d, 0);
+    const saldo = saldoDe(s.cliente);
+    const monto = Number(s.monto || 0);
+    const over = monto > saldo;
+
+    const order = ['cliente', 'importe', 'medio'];
+    if (s.medio === 'Efectivo') order.push('quien');
+    order.push('dia', 'resumen');
+    const idx = order.indexOf(s.step);
+    const sel = (on) => ({ border: on ? '#0B57A4' : '#D5DCE3', bg: on ? '#E6EFF9' : '#FFFFFF' });
+    const go = (step, extra) => this.setState(Object.assign({}, extra || {}, { step: step }));
+
+    const clientes = Object.keys(data).map((c) => Object.assign({ label: c, saldoText: fmtN(saldoDe(c)), color: colores[c] }, sel(s.cliente === c), {
+      pick: () => go('importe', { cliente: c, monto: s.cliente === c ? s.monto : '' })
+    }));
+
+    const keyLabels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', 'Borrar'];
+    const keys = keyLabels.map((k) => ({
+      label: k,
+      aria: k === 'Borrar' ? 'Borrar último número' : k,
+      size: k === 'Borrar' ? '17px' : '24px',
+      press: () => {
+        if (k === 'Borrar') { this.setState({ monto: s.monto.slice(0, -1) }); return; }
+        const next = (s.monto + k).replace(/^0+/, '');
+        if (next.length <= 7) this.setState({ monto: next });
+      }
+    }));
+
+    const medios = [
+      { label: 'Efectivo', sub: 'En mano' },
+      { label: 'Transferencia', sub: 'Va directo al banco' }
+    ].map((m) => Object.assign({}, m, sel(s.medio === m.label), {
+      pick: () => go(m.label === 'Efectivo' ? 'quien' : 'dia', { medio: m.label, quien: m.label === 'Efectivo' ? s.quien : null })
+    }));
+
+    const quienes = ['Vos', 'Ana (telefonista)', 'Juan', 'Carlos', 'Diego', 'Pablo'].map((q) => Object.assign({ label: q }, sel(s.quien === q), {
+      pick: () => go('dia', { quien: q })
+    }));
+
+    const dias = [
+      { label: 'Hoy', sub: 'domingo 18' },
+      { label: 'Ayer', sub: 'sábado 17' },
+      { label: 'Otro día', sub: 'elegir en el calendario' }
+    ].map((d) => Object.assign({}, d, sel(s.dia === d.label), {
+      pick: () => go('resumen', { dia: d.label })
+    }));
+
+    let resto = monto;
+    const aplica = [];
+    (data[s.cliente] || []).forEach((x) => {
+      if (resto <= 0) return;
+      const usa = Math.min(resto, x.d);
+      resto -= usa;
+      aplica.push({ fecha: x.fecha, text: usa === x.d ? 'queda pago (' + fmtN(usa) + ')' : fmtN(usa) + ' de ' + fmtN(x.d) });
+    });
+
+    const queda = saldo - monto;
+    const diaTxt = s.dia === 'Otro día' ? 'el día elegido' : (s.dia || '').toLowerCase();
+    let frase = s.cliente + ' pagó ' + fmtN(monto) + ' ' + diaTxt;
+    if (s.medio === 'Transferencia') frase += ' por transferencia.';
+    else frase += ' en efectivo' + (s.quien === 'Vos' ? ', lo recibiste vos.' : ' a ' + s.quien + '.');
+    let efecto = '';
+    if (s.medio === 'Transferencia') efecto = 'Se suma al banco.';
+    else if (s.quien === 'Vos') efecto = 'Se suma a tu caja.';
+    else efecto = s.quien + ' te tiene que entregar ' + fmtN(monto) + '.';
+
+    return {
+      showBack: idx > 0,
+      showCancel: idx <= 0 && s.step !== 'listo',
+      progress: idx >= 0 ? 'Paso ' + (idx + 1) + ' de ' + order.length : '',
+      isCliente: s.step === 'cliente', isImporte: s.step === 'importe', isMedio: s.step === 'medio',
+      isQuien: s.step === 'quien', isDia: s.step === 'dia', isResumen: s.step === 'resumen', isListo: s.step === 'listo',
+      clientes: clientes, keys: keys, medios: medios, quienes: quienes, dias: dias, aplica: aplica,
+      cliente: s.cliente, saldoText: fmtN(saldo),
+      montoText: fmtN(monto),
+      montoBorder: over ? '#B3261E' : '#0B57A4',
+      hasError: over,
+      errorText: 'Es más de lo que debe. Debe ' + fmtN(saldo) + '. Revisá el importe.',
+      cantNext: !monto || over,
+      nextBg: !monto || over ? '#9AA7B4' : '#0B57A4',
+      pagoTodo: () => this.setState({ monto: String(saldo) }),
+      nextImporte: () => { if (monto && !over) go('medio'); },
+      back: () => { if (idx > 0) go(order[idx - 1]); },
+      frase: frase, efecto: efecto, quedaText: fmtN(queda),
+      guardar: () => go('listo'),
+      corregir: () => go('importe'),
+      listoText: s.cliente + (queda === 0 ? ' ya no debe nada.' : ' ahora debe ' + fmtN(queda) + '.'),
+      reiniciar: () => go('cliente', { cliente: null, monto: '', medio: null, quien: null, dia: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

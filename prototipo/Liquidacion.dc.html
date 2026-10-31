@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Anotar liquidación</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B57A4}a:hover{color:#08427D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F3F5F7; color: #15202B; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 18px; overflow: hidden">
+
+<div style="display: flex; align-items: center; justify-content: space-between; height: 60px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D5DCE3">
+<sc-if value="{{showBack}}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{back}}" style="display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 8px; border: 0; background: none; color: #0B57A4; font: inherit; font-weight: 700; cursor: pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Atrás</button>
+</sc-if>
+<sc-if value="{{showCancel}}" hint-placeholder-val="{{ true }}">
+<a href="Main.dc.html" style="display: flex; align-items: center; height: 48px; padding: 0 8px; color: #0B57A4; text-decoration: none; font-weight: 700">Cancelar</a>
+</sc-if>
+<span style="font-weight: 700">Liquidación</span>
+<span style="min-width: 88px; text-align: right; padding-right: 8px; font-size: 16px; color: #4A5866">{{progress}}</span>
+</div>
+
+<div style="flex: 1; overflow-y: auto; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 16px">
+
+<sc-if value="{{isChofer}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Qué chofer terminó el turno?</h1>
+<span style="color: #4A5866">Hoy, domingo 18.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{choferes}}" as="item" hint-placeholder-count="2">
+<button type="button" onClick="{{item.pick}}" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-height: 72px; padding: 0 18px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; cursor: pointer; text-align: left">
+<span style="font-size: 20px; font-weight: 700">{{item.label}}</span><span style="font-size: 16px; color: #4A5866">{{item.sub}}</span></button>
+</sc-for>
+</div>
+<span style="font-size: 16px; color: #4A5866">Carlos y Pablo están en el turno noche. Aparecen acá cuando termine.</span>
+</sc-if>
+
+<sc-if value="{{isViajes}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Están todos los viajes?</h1>
+<span style="color: #4A5866">Compará con el papel de {{chofer}}.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 18px">
+<div style="display: flex; justify-content: space-between"><span>{{ef.n}} en efectivo</span><span style="font-weight: 700">{{ef.t}}</span></div>
+<div style="display: flex; justify-content: space-between"><span>{{tj.n}} con tarjeta</span><span style="font-weight: 700">{{tj.t}}</span></div>
+<div style="display: flex; justify-content: space-between"><span>{{fi.n}} fiados</span><span style="font-weight: 700">{{fi.t}}</span></div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #E6EAEE; padding-top: 12px; font-size: 20px"><span style="font-weight: 700">Total del turno</span><span style="font-weight: 700">{{totalText}}</span></div>
+</div>
+<button type="button" onClick="{{viajesOk}}" style="height: 60px; border-radius: 14px; border: 0; background: #0B57A4; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Sí, están todos</button>
+<a href="Viaje.dc.html" style="display: flex; align-items: center; justify-content: center; height: 60px; border-radius: 14px; border: 2px solid #0B57A4; background: #FFFFFF; color: #0B57A4; text-decoration: none; font-size: 20px; font-weight: 700; box-sizing: border-box">Faltan viajes, anotarlos</a>
+</sc-if>
+
+<sc-if value="{{isGasto}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Pagó algo con la plata del turno?</h1>
+<span style="color: #4A5866">Por ejemplo, si cargó combustible.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{gastos}}" as="item" hint-placeholder-count="3">
+<button type="button" onClick="{{item.pick}}" style="min-height: 64px; padding: 0 18px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer; text-align: left">{{item.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{isMontoGasto}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Cuánto pagó de {{gastoTipoLower}}?</h1>
+<span style="color: #4A5866">Se anota como gasto y se descuenta de lo que tiene que entregar.</span>
+</div>
+<div aria-live="polite" style="background: #FFFFFF; border: 2px solid #0B57A4; border-radius: 14px; padding: 14px 18px; font-size: 40px; font-weight: 700; text-align: right">{{gastoText}}</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{keysGasto}}" as="item" hint-placeholder-count="12">
+<button type="button" onClick="{{item.press}}" aria-label="{{item.aria}}" style="height: 60px; border-radius: 12px; border: 1px solid #D5DCE3; background: #FFFFFF; color: #15202B; font: inherit; font-size: {{item.size}}; font-weight: 700; cursor: pointer">{{item.label}}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{gastoOk}}" disabled="{{noGasto}}" style="height: 60px; border-radius: 14px; border: 0; background: {{gastoBg}}; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Siguiente</button>
+</sc-if>
+
+<sc-if value="{{isCuenta}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">La cuenta de {{chofer}}</h1>
+<span style="color: #4A5866">{{reglaText}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 18px">
+<div style="display: flex; justify-content: space-between"><span>Total del turno</span><span style="font-weight: 700">{{totalText}}</span></div>
+<div style="display: flex; justify-content: space-between"><span>Su parte (30 %)</span><span style="font-weight: 700">{{parteText}}</span></div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #E6EAEE; padding-top: 12px"><span>Efectivo que juntó</span><span style="font-weight: 700">{{ef.t}}</span></div>
+<div style="display: flex; justify-content: space-between"><span>Menos lo que pagó</span><span style="font-weight: 700">− {{gastoText}}</span></div>
+<div style="display: flex; justify-content: space-between"><span>Menos su parte</span><span style="font-weight: 700">− {{parteText}}</span></div>
+<div style="display: flex; justify-content: space-between; border-top: 2px solid #15202B; padding-top: 12px; font-size: 22px"><span style="font-weight: 700">{{resultadoLabel}}</span><span style="font-weight: 700">{{resultadoText}}</span></div>
+</div>
+<span style="font-size: 16px; color: #4A5866">La tarjeta queda esperando a Handy y los fiados quedan en la cuenta de cada cliente.</span>
+<span style="display: inline-flex; align-self: flex-start; background: #FFF2D6; color: #6B4100; font-size: 15px; font-weight: 700; padding: 6px 12px; border-radius: 999px">Regla sin confirmar con tu padre</span>
+<button type="button" onClick="{{cuentaOk}}" style="height: 60px; border-radius: 14px; border: 0; background: #0B57A4; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Siguiente</button>
+</sc-if>
+
+<sc-if value="{{isEntrega}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Cuánto entregó {{chofer}}?</h1>
+<span style="color: #4A5866">Tenía que entregar {{esperadoText}}.</span>
+</div>
+<button type="button" onClick="{{justo}}" style="height: 56px; border-radius: 12px; border: 2px solid #1B6E3F; background: #FFFFFF; color: #1B6E3F; font: inherit; font-weight: 700; cursor: pointer">Entregó justo ({{esperadoText}})</button>
+<div aria-live="polite" style="background: #FFFFFF; border: 2px solid #0B57A4; border-radius: 14px; padding: 14px 18px; font-size: 40px; font-weight: 700; text-align: right">{{entregaText}}</div>
+<sc-if value="{{hasDif}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="background: #FFF2D6; color: #6B4100; border-radius: 12px; padding: 12px 14px; font-weight: 700">{{difText}}</div>
+</sc-if>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{keysEntrega}}" as="item" hint-placeholder-count="12">
+<button type="button" onClick="{{item.press}}" aria-label="{{item.aria}}" style="height: 54px; border-radius: 12px; border: 1px solid #D5DCE3; background: #FFFFFF; color: #15202B; font: inherit; font-size: {{item.size}}; font-weight: 700; cursor: pointer">{{item.label}}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{entregaOk}}" disabled="{{noEntrega}}" style="height: 60px; border-radius: 14px; border: 0; background: {{entregaBg}}; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Siguiente</button>
+</sc-if>
+
+<sc-if value="{{isResumen}}" hint-placeholder-val="{{ false }}">
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">¿Está bien?</h1>
+<div style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 18px">
+<div style="font-size: 20px; font-weight: 700; line-height: 1.35">{{frase}}</div>
+<div style="display: flex; justify-content: space-between; border-top: 1px solid #E6EAEE; padding-top: 12px"><span style="color: #4A5866">Total del turno</span><span style="font-weight: 700">{{totalText}}</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #4A5866">Su parte</span><span style="font-weight: 700">{{parteText}}</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #4A5866">Gasto pagado</span><span style="font-weight: 700">{{gastoText}}</span></div>
+<sc-if value="{{hasDif}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; justify-content: space-between; color: #8A5300"><span>Diferencia</span><span style="font-weight: 700">{{difCorto}}</span></div>
+</sc-if>
+</div>
+<button type="button" onClick="{{guardar}}" style="height: 60px; border-radius: 14px; border: 0; background: #0B57A4; color: #FFFFFF; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Guardar liquidación</button>
+<button type="button" onClick="{{corregir}}" style="height: 48px; border: 0; background: none; color: #0B57A4; font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline">Corregir algo</button>
+</sc-if>
+
+<sc-if value="{{isListo}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 60px; text-align: center">
+<div style="width: 88px; height: 88px; border-radius: 44px; background: #E5F3EA; display: flex; align-items: center; justify-content: center">
+<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1B6E3F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>
+</div>
+<h1 style="margin: 0; font-size: 26px; font-weight: 700">Turno de {{chofer}} cerrado</h1>
+<span style="color: #4A5866">Queda guardado. Para cambiarlo después hay que anotar el motivo.</span>
+</div>
+<a href="Main.dc.html" style="display: flex; align-items: center; justify-content: center; height: 60px; border-radius: 14px; background: #0B57A4; color: #FFFFFF; text-decoration: none; font-size: 20px; font-weight: 700">Volver al inicio</a>
+<button type="button" onClick="{{reiniciar}}" style="height: 60px; border-radius: 14px; border: 2px solid #0B57A4; background: #FFFFFF; color: #0B57A4; font: inherit; font-size: 20px; font-weight: 700; cursor: pointer">Liquidar otro chofer</button>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { step: 'chofer', chofer: null, gastoTipo: null, gasto: '', entrega: '' };
+  }
+  renderVals() {
+    const s = this.state;
+    const fmtN = (n) => (n < 0 ? '− ' : '') + '$ ' + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const data = {
+      Juan: { turno: 'Móvil 1 · Día (6 a 18)', ef: [8, 2000], tj: [3, 800], fi: [2, 1000] },
+      Diego: { turno: 'Móvil 2 · Día (6 a 18)', ef: [7, 1650], tj: [2, 400], fi: [0, 0] }
+    };
+    const d = data[s.chofer] || { ef: [0, 0], tj: [0, 0], fi: [0, 0] };
+    const total = d.ef[1] + d.tj[1] + d.fi[1];
+    const parte = Math.round(total * 0.3);
+    const gasto = Number(s.gasto || 0);
+    const esperado = d.ef[1] - gasto - parte;
+    const pagaEmpresa = esperado < 0;
+    const entrega = Number(s.entrega || 0);
+    const dif = entrega - esperado;
+
+    const order = ['chofer', 'viajes', 'gasto'];
+    if (s.gastoTipo && s.gastoTipo !== 'No pagó nada') order.push('montoGasto');
+    order.push('cuenta');
+    if (!pagaEmpresa) order.push('entrega');
+    order.push('resumen');
+    const idx = order.indexOf(s.step);
+    const sel = (on) => ({ border: on ? '#0B57A4' : '#D5DCE3', bg: on ? '#E6EFF9' : '#FFFFFF' });
+    const go = (step, extra) => this.setState(Object.assign({}, extra || {}, { step: step }));
+    const cuenta = (n, sing, plur) => n + ' ' + (n === 1 ? sing : plur);
+    const keypad = (field) => ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', 'Borrar'].map((k) => ({
+      label: k,
+      aria: k === 'Borrar' ? 'Borrar último número' : k,
+      size: k === 'Borrar' ? '17px' : '24px',
+      press: () => {
+        const cur = s[field];
+        const p = {};
+        if (k === 'Borrar') { p[field] = cur.slice(0, -1); this.setState(p); return; }
+        const next = (cur + k).replace(/^0+/, '');
+        if (next.length <= 7) { p[field] = next; this.setState(p); }
+      }
+    }));
+
+    const choferes = Object.keys(data).map((c) => Object.assign({ label: c, sub: 'Terminó ' + data[c].turno }, sel(s.chofer === c), {
+      pick: () => go('viajes', { chofer: c, gastoTipo: null, gasto: '', entrega: '' })
+    }));
+    const gastos = ['Combustible', 'Otro gasto', 'No pagó nada'].map((g) => Object.assign({ label: g }, sel(s.gastoTipo === g), {
+      pick: () => go(g === 'No pagó nada' ? 'cuenta' : 'montoGasto', { gastoTipo: g, gasto: g === 'No pagó nada' ? '' : s.gasto })
+    }));
+
+    let frase = '';
+    if (pagaEmpresa) frase = 'A ' + s.chofer + ' le pagaste ' + fmtN(-esperado) + ' por su parte del turno.';
+    else frase = s.chofer + ' entregó ' + fmtN(entrega) + ' y se quedó con su parte de ' + fmtN(parte) + '.';
+    let difText = '';
+    if (dif < 0) difText = 'Faltan ' + fmtN(-dif) + '. Queda anotado como diferencia de ' + s.chofer + '.';
+    if (dif > 0) difText = 'Entregó ' + fmtN(dif) + ' de más. Queda anotado.';
+
+    return {
+      showBack: idx > 0,
+      showCancel: idx <= 0 && s.step !== 'listo',
+      progress: idx >= 0 ? 'Paso ' + (idx + 1) + ' de ' + order.length : '',
+      isChofer: s.step === 'chofer', isViajes: s.step === 'viajes', isGasto: s.step === 'gasto', isMontoGasto: s.step === 'montoGasto',
+      isCuenta: s.step === 'cuenta', isEntrega: s.step === 'entrega', isResumen: s.step === 'resumen', isListo: s.step === 'listo',
+      choferes: choferes, gastos: gastos, chofer: s.chofer,
+      ef: { n: cuenta(d.ef[0], 'viaje', 'viajes'), t: fmtN(d.ef[1]) },
+      tj: { n: cuenta(d.tj[0], 'viaje', 'viajes'), t: fmtN(d.tj[1]) },
+      fi: { n: cuenta(d.fi[0], 'viaje', 'viajes'), t: fmtN(d.fi[1]) },
+      totalText: fmtN(total), parteText: fmtN(parte), gastoText: fmtN(gasto),
+      gastoTipoLower: (s.gastoTipo || '').toLowerCase(),
+      reglaText: 'Cobra el 30 % de todo lo que hizo, fiados incluidos, y se queda con su parte.',
+      resultadoLabel: pagaEmpresa ? 'Le tenés que pagar' : 'Te tiene que entregar',
+      resultadoText: fmtN(Math.abs(esperado)),
+      esperadoText: fmtN(Math.max(esperado, 0)),
+      entregaText: fmtN(entrega),
+      keysGasto: keypad('gasto'), keysEntrega: keypad('entrega'),
+      noGasto: !s.gasto, gastoBg: s.gasto ? '#0B57A4' : '#9AA7B4',
+      noEntrega: s.entrega === '', entregaBg: s.entrega !== '' ? '#0B57A4' : '#9AA7B4',
+      hasDif: !pagaEmpresa && s.entrega !== '' && dif !== 0,
+      difText: difText,
+      difCorto: dif < 0 ? 'faltan ' + fmtN(-dif) : 'sobran ' + fmtN(dif),
+      frase: frase,
+      viajesOk: () => go('gasto'),
+      gastoOk: () => { if (s.gasto) go('cuenta'); },
+      cuentaOk: () => go(pagaEmpresa ? 'resumen' : 'entrega'),
+      justo: () => this.setState({ entrega: String(esperado) }),
+      entregaOk: () => { if (s.entrega !== '') go('resumen'); },
+      back: () => { if (idx > 0) go(order[idx - 1]); },
+      guardar: () => go('listo'),
+      corregir: () => go('viajes'),
+      reiniciar: () => go('chofer', { chofer: null, gastoTipo: null, gasto: '', entrega: '' })
+    };
+  }
+}
+</script>
+</body>
+</html>
