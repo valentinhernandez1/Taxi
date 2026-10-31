@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Turnos de la semana</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B57A4}a:hover{color:#08427D}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: #F3F5F7; color: #15202B; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 18px; overflow: hidden">
+
+<div style="display: flex; align-items: center; height: 60px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D5DCE3">
+<a href="Mas.dc.html" style="display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 8px; color: #0B57A4; text-decoration: none; font-weight: 700">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Más</a>
+</div>
+
+<div style="flex: 1; overflow-y: auto; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700">Turnos</h1>
+<span style="color: #4A5866">Semana del lunes 19 al domingo 25 de octubre</span>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{hasFaltan}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 10px; background: #FCE8E6; color: #B3261E; border-radius: 12px; padding: 12px 14px; font-weight: 700">
+<span style="width: 10px; height: 10px; border-radius: 5px; background: #B3261E; flex-shrink: 0"></span>{{faltanText}}</div>
+</sc-if>
+<sc-if value="{{hasConflictos}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 10px; background: #FFF2D6; color: #6B4100; border-radius: 12px; padding: 12px 14px; font-weight: 700">
+<span style="width: 10px; height: 10px; border-radius: 5px; background: #C98300; flex-shrink: 0"></span>{{conflictoText}}</div>
+</sc-if>
+<sc-if value="{{todoOk}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 10px; background: #E5F3EA; color: #1B6E3F; border-radius: 12px; padding: 12px 14px; font-weight: 700">Todos los turnos están cubiertos</div>
+</sc-if>
+</div>
+
+<span style="font-size: 16px; color: #4A5866">Tocá un turno para cambiar el chofer. Día: 6 a 18 · Noche: 18 a 6.</span>
+
+<sc-for list="{{dias}}" as="day" hint-placeholder-count="7">
+<div style="background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 12px; display: grid; grid-template-columns: 68px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center">
+<span style="grid-column: 1 / -1; font-weight: 700; font-size: 18px">{{day.nombre}}</span>
+<span style="font-size: 15px; color: #4A5866">Móvil 1</span>
+<button type="button" onClick="{{day.m1d.pick}}" aria-label="{{day.m1d.aria}}" style="min-height: 48px; border-radius: 10px; border: 2px {{day.m1d.lineStyle}} {{day.m1d.border}}; background: {{day.m1d.bg}}; color: {{day.m1d.color}}; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{day.m1d.text}}</button>
+<button type="button" onClick="{{day.m1n.pick}}" aria-label="{{day.m1n.aria}}" style="min-height: 48px; border-radius: 10px; border: 2px {{day.m1n.lineStyle}} {{day.m1n.border}}; background: {{day.m1n.bg}}; color: {{day.m1n.color}}; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{day.m1n.text}}</button>
+<span style="font-size: 15px; color: #4A5866">Móvil 2</span>
+<button type="button" onClick="{{day.m2d.pick}}" aria-label="{{day.m2d.aria}}" style="min-height: 48px; border-radius: 10px; border: 2px {{day.m2d.lineStyle}} {{day.m2d.border}}; background: {{day.m2d.bg}}; color: {{day.m2d.color}}; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{day.m2d.text}}</button>
+<button type="button" onClick="{{day.m2n.pick}}" aria-label="{{day.m2n.aria}}" style="min-height: 48px; border-radius: 10px; border: 2px {{day.m2n.lineStyle}} {{day.m2n.border}}; background: {{day.m2n.bg}}; color: {{day.m2n.color}}; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{day.m2n.text}}</button>
+</div>
+</sc-for>
+
+<button type="button" onClick="{{repetir}}" style="height: 56px; border-radius: 14px; border: 2px solid #0B57A4; background: #FFFFFF; color: #0B57A4; font: inherit; font-weight: 700; cursor: pointer">Repetir la semana anterior</button>
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="background: #E5F3EA; color: #1B6E3F; border-radius: 12px; padding: 12px 14px; font-weight: 700">{{toast}}</div>
+</sc-if>
+</div>
+
+<sc-if value="{{sheetOpen}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; background: rgba(21, 32, 43, 0.45); display: flex; flex-direction: column; justify-content: flex-end">
+<div role="dialog" aria-label="Elegir chofer" style="background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 22px; font-weight: 700">¿Quién maneja?</span>
+<span style="color: #4A5866">{{sheetTitle}}</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{opciones}}" as="item" hint-placeholder-count="4">
+<button type="button" onClick="{{item.pick}}" style="min-height: 60px; border-radius: 14px; border: 2px solid {{item.border}}; background: {{item.bg}}; color: #15202B; font: inherit; font-size: 19px; font-weight: 700; cursor: pointer">{{item.label}}</button>
+</sc-for>
+</div>
+<button type="button" onClick="{{dejarVacio}}" style="min-height: 56px; border-radius: 14px; border: 2px dashed #B3261E; background: #FFFFFF; color: #B3261E; font: inherit; font-weight: 700; cursor: pointer">Dejar sin chofer</button>
+<button type="button" onClick="{{cerrar}}" style="min-height: 48px; border: 0; background: none; color: #0B57A4; font: inherit; font-weight: 700; cursor: pointer">Cancelar</button>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const asg = {};
+    const base = { m1d: 'Juan', m1n: 'Carlos', m2d: 'Diego', m2n: 'Pablo' };
+    for (let d = 0; d < 7; d++) {
+      Object.keys(base).forEach((k) => { asg[d + '-' + k] = base[k]; });
+    }
+    asg['2-m2n'] = null;
+    asg['3-m1d'] = 'Pablo';
+    asg['5-m2n'] = null;
+    asg['6-m1d'] = null;
+    this.state = { asg: asg, sel: null, toast: '' };
+  }
+  renderVals() {
+    const s = this.state;
+    const nombres = ['Lunes 19', 'Martes 20', 'Miércoles 21', 'Jueves 22', 'Viernes 23', 'Sábado 24', 'Domingo 25'];
+    const slotNames = { m1d: 'Móvil 1 · Día', m1n: 'Móvil 1 · Noche', m2d: 'Móvil 2 · Día', m2n: 'Móvil 2 · Noche' };
+    const tints = { Juan: '#E6EFF9', Carlos: '#E5F3EA', Diego: '#F1E8F8', Pablo: '#FFF2D6' };
+    const keys = ['m1d', 'm1n', 'm2d', 'm2n'];
+    let faltan = 0;
+    const conflictos = [];
+
+    const dias = nombres.map((nombre, d) => {
+      const count = {};
+      keys.forEach((k) => { const c = s.asg[d + '-' + k]; if (c) count[c] = (count[c] || 0) + 1; });
+      Object.keys(count).forEach((c) => { if (count[c] > 1) conflictos.push(c + ' tiene 2 turnos el ' + nombre.split(' ')[0].toLowerCase()); });
+      const day = { nombre: nombre };
+      keys.forEach((k) => {
+        const c = s.asg[d + '-' + k];
+        const dup = c && count[c] > 1;
+        if (!c) faltan++;
+        day[k] = {
+          text: c ? (dup ? c + ' !' : c) : 'Sin cubrir',
+          bg: c ? tints[c] : '#FFFFFF',
+          border: !c ? '#B3261E' : dup ? '#C98300' : 'transparent',
+          lineStyle: c ? 'solid' : 'dashed',
+          color: c ? '#15202B' : '#B3261E',
+          aria: nombre + ', ' + slotNames[k] + ': ' + (c || 'sin cubrir') + '. Cambiar',
+          pick: () => this.setState({ sel: { d: d, k: k }, toast: '' })
+        };
+      });
+      return day;
+    });
+
+    const selVal = s.sel ? s.asg[s.sel.d + '-' + s.sel.k] : null;
+    const asignar = (val) => {
+      const asg = Object.assign({}, s.asg);
+      asg[s.sel.d + '-' + s.sel.k] = val;
+      this.setState({ asg: asg, sel: null });
+    };
+    const opciones = ['Juan', 'Carlos', 'Diego', 'Pablo'].map((c) => ({
+      label: c,
+      border: selVal === c ? '#0B57A4' : '#D5DCE3',
+      bg: selVal === c ? '#E6EFF9' : '#FFFFFF',
+      pick: () => asignar(c)
+    }));
+
+    return {
+      dias: dias,
+      hasFaltan: faltan > 0,
+      faltanText: faltan + (faltan === 1 ? ' turno sin cubrir' : ' turnos sin cubrir'),
+      hasConflictos: conflictos.length > 0,
+      conflictoText: conflictos.join(' · '),
+      todoOk: faltan === 0 && conflictos.length === 0,
+      sheetOpen: !!s.sel,
+      sheetTitle: s.sel ? nombres[s.sel.d] + ' · ' + slotNames[s.sel.k] : '',
+      opciones: opciones,
+      dejarVacio: () => asignar(null),
+      cerrar: () => this.setState({ sel: null }),
+      repetir: () => this.setState({ toast: 'Se copió la semana anterior. Revisá los turnos marcados.' }),
+      hasToast: !!s.toast,
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Dónde ganar más</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#0B57A4}a:hover{color:#08427D}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; display: flex; flex-direction: column; background: #F3F5F7; color: #15202B; font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 18px; overflow: hidden">
+<div style="display: flex; align-items: center; height: 60px; padding: 0 8px; background: #FFFFFF; border-bottom: 1px solid #D5DCE3">
+<a href="Ganancia.dc.html" style="display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 8px; color: #0B57A4; text-decoration: none; font-weight: 700">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Ganancia</a>
+</div>
+<div style="flex: 1; overflow-y: auto; padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 700">Dónde ganar más</h1>
+<span style="color: #4A5866">Calculado con los datos de setiembre. Son sugerencias: la decisión es tuya.</span>
+</div>
+
+<sc-for list="{{ideas}}" as="item" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border: 1px solid #D5DCE3; border-radius: 14px; padding: 16px; opacity: {{item.opacity}}">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<h2 style="margin: 0; font-size: 20px; font-weight: 700">{{item.titulo}}</h2>
+<span style="flex-shrink: 0; background: {{item.chipBg}}; color: {{item.chipColor}}; font-size: 15px; font-weight: 700; padding: 4px 10px; border-radius: 999px">{{item.monto}}</span>
+</div>
+<span style="line-height: 1.4">{{item.texto}}</span>
+<span style="font-size: 16px; color: #4A5866; line-height: 1.4">{{item.como}}</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-if value="{{item.hasLink}}" hint-placeholder-val="{{ true }}">
+<a href="{{item.href}}" style="display: flex; align-items: center; justify-content: center; height: 48px; padding: 0 16px; border-radius: 12px; background: #0B57A4; color: #FFFFFF; text-decoration: none; font-weight: 700">{{item.accion}}</a>
+</sc-if>
+<button type="button" onClick="{{item.toggle}}" style="height: 48px; padding: 0 16px; border-radius: 12px; border: 2px solid #D5DCE3; background: #FFFFFF; color: #15202B; font: inherit; font-weight: 700; cursor: pointer">{{item.toggleText}}</button>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { hechas: {} };
+  }
+  renderVals() {
+    const s = this.state;
+    const base = [
+      {
+        id: 'turnos', titulo: 'Cubrí las noches del Móvil 2', monto: '≈ $ 6.400 / mes', tipo: 'gana',
+        texto: 'En setiembre el Móvil 2 quedó parado 6 noches. Una noche factura en promedio $ 2.350.',
+        como: 'Después de pagar chofer y combustible, esas 6 noches te habrían dejado unos $ 6.400. Un chofer suplente para esas noches se paga solo.',
+        href: 'Turnos.dc.html', accion: 'Ver turnos'
+      },
+      {
+        id: 'fiados', titulo: 'Cobrá los fiados viejos', monto: '$ 3.750 para cobrar', tipo: 'gana',
+        texto: 'Rodríguez y Almacén La Esquina deben $ 3.750 entre los dos, y $ 2.100 de eso tiene más de 30 días. En setiembre se fió $ 14.500 y se cobró $ 9.000: la deuda creció $ 5.500.',
+        como: 'Mandales un recordatorio por WhatsApp desde la ficha. Y poné un límite de fiado por cliente: la app avisa antes de fiarle a quien ya debe mucho.',
+        href: 'QuienDebe.dc.html', accion: 'Ver quién debe'
+      },
+      {
+        id: 'movil2', titulo: 'Revisá el Móvil 2', monto: '$ 16.500 más de taller', tipo: 'pierde',
+        texto: 'Gastó $ 22.500 de taller: 19 % de lo que facturó. El Móvil 1 gastó 4 %. En combustible también gasta más: 28 % contra 23 %.',
+        como: 'Si se repite dos o tres meses, conviene pedir presupuesto de una reparación de fondo y compararlo con cambiar el coche. La app te muestra la cuenta mes a mes.',
+        href: '', accion: ''
+      },
+      {
+        id: 'vencimientos', titulo: 'Pagá a tiempo', monto: '1 vencido', tipo: 'pierde',
+        texto: 'Antel venció el viernes 16. Pagar tarde suele traer recargos o cortes.',
+        como: 'Con los avisos prendidos te llega una notificación 3 días antes de cada vencimiento.',
+        href: 'Vencimientos.dc.html', accion: 'Ver vencimientos'
+      },
+      {
+        id: 'llamadas', titulo: 'Anotá las llamadas perdidas', monto: 'Para decidir', tipo: 'dato',
+        texto: 'Cuando alguien llama y no hay coche libre, ese viaje se pierde y no queda registrado.',
+        como: 'Si el telefonista anota esas llamadas en el papel (hora y día), la app te dice en qué horarios falta un coche y si conviene sumar un turno o un tercer coche.',
+        href: '', accion: ''
+      }
+    ];
+    const chips = {
+      gana: { bg: '#E5F3EA', color: '#1B6E3F' },
+      pierde: { bg: '#FCE8E6', color: '#B3261E' },
+      dato: { bg: '#E6EFF9', color: '#0B57A4' }
+    };
+    const ideas = base.map((it) => {
+      const hecha = !!s.hechas[it.id];
+      return Object.assign({}, it, {
+        chipBg: chips[it.tipo].bg, chipColor: chips[it.tipo].color,
+        hasLink: !!it.href,
+        opacity: hecha ? '0.55' : '1',
+        toggleText: hecha ? 'Volver a mostrar' : 'Ya lo hice',
+        toggle: () => { const h = Object.assign({}, s.hechas); h[it.id] = !hecha; this.setState({ hechas: h }); }
+      });
+    });
+    return { ideas: ideas };
+  }
+}
+</script>
+</body>
+</html>
