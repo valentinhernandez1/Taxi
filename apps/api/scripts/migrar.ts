@@ -8,11 +8,11 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { opcionesConexion } from "../src/db/cliente";
+import { normalizarUrl, opcionesConexion } from "../src/db/cliente";
 import { urlDeLaBase } from "./entorno";
 
 export async function migrar(url: string): Promise<void> {
-  const sql = postgres(url, opcionesConexion());
+  const sql = postgres(normalizarUrl(url), opcionesConexion());
   try {
     await migrate(drizzle(sql), {
       migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)),

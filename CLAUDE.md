@@ -30,8 +30,8 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 - Monorepo TypeScript (pnpm workspaces): `apps/web` (React + Vite + Tailwind, PWA), `apps/api` (**Hono** sobre Cloudflare Workers), `packages/shared` (esquemas Zod y reglas de dinero como funciones puras).
 - PostgreSQL en **Neon** + Drizzle ORM con **postgres.js por TCP** (decidido en la Etapa 2: mismo driver en local y en Neon, sin proxy; se cambia solo en `apps/api/src/db/cliente.ts`). SQL explícito para vistas de saldos. En desarrollo, Postgres local con Docker Compose.
 - Auth: sesión en cookie httpOnly, segura y SameSite; hash de contraseña con WebCrypto (PBKDF2) o el que entre en el límite de CPU de Workers; límite de intentos.
-- Pruebas: Vitest (reglas y API, con `@cloudflare/vitest-pool-workers` para la API) y Playwright (flujos en viewport de celular).
-- Infraestructura (todo en planes gratuitos, detalle en `docs/infraestructura.md`): Cloudflare Pages (web), Cloudflare Workers (API), Neon (base), GitHub Actions (copias diarias cifradas con `pg_dump` y CI), Web Push para avisos.
+- Pruebas: Vitest (reglas y API, con `@cloudflare/vitest-plugin` para la API) y Playwright (flujos en viewport de celular).
+- Infraestructura (todo en planes gratuitos, detalle en `docs/infraestructura.md` y `docs/despliegue.md`): un Cloudflare Worker que sirve la web (archivos estáticos) y la API, Neon (base), GitHub Actions (copias diarias cifradas con `pg_dump` y CI), Web Push para avisos.
 - Restricciones a respetar: Workers gratis = 10 ms de CPU por pedido y 100.000 pedidos/día; sin APIs de Node que Workers no soporte; Neon gratis = 1 GB, se suspende a los 5 min sin uso y guarda solo 6 h de historial (por eso las copias propias son obligatorias).
 - Todo con PostgreSQL estándar, sin depender de funciones propietarias, para poder mudarse de proveedor sin reescribir.
 - No agregar servicios pagos sin explicar costo y pedir aprobación.
@@ -51,5 +51,6 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 - Etapa 1 (prototipo) hecha: ver `prototipo/`. Son mockups en formato `.dc.html` (HTML + una clase JS de lógica); sirven como referencia visual y de flujo, **no** son código a reutilizar.
 - Etapa 2 (base del proyecto) hecha en local: monorepo, modelo de datos y migraciones, login (PBKDF2 20.000 iteraciones, medido), ajustes, auditoría inmutable, copias cifradas con restauración probada, CI. Decisiones y guía en `README.md`. Falta desplegar (Neon, Cloudflare) y medir el CPU real del login.
 - Etapa 3 (clientes, fiados, cobros y carga inicial) hecha en local; ver la sección en `README.md`. Falta que el dueño pase dos hojas reales de prueba y coincidan con el papel.
-- Próximo paso: **Etapa 4 — uso real 1** (desplegar y que el dueño use fiados y cobros); después Etapa 5, viajes y plata.
+- Etapa 4 (uso real 1) preparada: despliegue automático a un solo Worker (web + API) y guía en `docs/despliegue.md`. Falta que Valentín cree las cuentas (Neon, Cloudflare), cargue los secrets y que el dueño use fiados y cobros.
+- Próximo paso: **Etapa 5 — viajes y plata**. Pantallas nuevas de referencia en `prototipo/pantallas-nuevas/` (gastos, coches, choferes, empleados, ajustes).
 - Hay pendientes para confirmar con el dueño (lista al final de la especificación). Mientras tanto, todo eso va configurable.
