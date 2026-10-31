@@ -146,7 +146,7 @@ function Visor({ id, alCerrar, alAnular }: { id: number; alCerrar: () => void; a
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Foto del comprobante" className="fixed inset-0 z-50 flex flex-col gap-3 bg-tinta/95 p-4">
+    <div role="dialog" aria-modal="true" aria-label="Foto del comprobante" className="fixed inset-0 z-50 flex flex-col gap-3 bg-tinta p-4">
       <div className="flex min-h-0 flex-1 items-center justify-center">
         <img src={`/api/comprobantes/${id}/foto`} alt="Foto del comprobante" className="max-h-full max-w-full rounded-lg" />
       </div>
