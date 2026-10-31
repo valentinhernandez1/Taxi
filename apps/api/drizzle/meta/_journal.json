@@ -36,6 +36,20 @@
       "when": 1793472089789,
       "tag": "0004_comprobantes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793474782334,
+      "tag": "0005_viajes_y_plata",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793474783615,
+      "tag": "0006_datos_base_y_saldos",
+      "breakpoints": true
     }
   ]
 }

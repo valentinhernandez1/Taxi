@@ -53,3 +53,44 @@ export interface Coche {
   matricula: string | null;
   activo: boolean;
 }
+
+export interface ViajeDelDia {
+  id: number;
+  importe: Centesimos;
+  forma_pago: "efectivo" | "tarjeta" | "fiado";
+  anulado: boolean;
+  motivo_anulacion: string | null;
+  chofer: string | null;
+  coche: string | null;
+  cliente: string | null;
+}
+
+export interface DiaDeViajes {
+  fecha: string;
+  viajes: ViajeDelDia[];
+  totales: { efectivo: Centesimos; tarjeta: Centesimos; fiado: Centesimos; total: Centesimos };
+  sin_trabajo: boolean;
+}
+
+export interface Cobertura {
+  completo: boolean;
+  diasSinCargar: string[];
+}
+
+export interface PersonaConPlata {
+  persona_id: number;
+  nombre: string;
+  tipo: Persona["tipo"];
+  saldo: Centesimos;
+  desde: string | null;
+}
+
+export interface ResumenPlata {
+  caja: Centesimos;
+  banco: Centesimos;
+  handy: Centesimos;
+  a_entregar: Centesimos;
+  personas: PersonaConPlata[];
+  handy_viajes: number;
+  handy_comision_estimada: Centesimos;
+}

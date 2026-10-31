@@ -55,17 +55,15 @@ insert into movimiento (fecha, importe, cuenta_desde, cuenta_hacia, tipo, origen
 insert into entrega (persona_id, fecha, esperado, entregado, diferencia, nota, op_key) values
   (2, '2026-10-15', 600.00, 550.00, 50.00, 'Dijo que falta un vuelto (ejemplo)', 'ej-e1');
 
-insert into categoria_gasto (nombre, es_de_coche) values
-  ('Combustible', true), ('Taller', true), ('Seguro', true), ('Cuota del coche', true),
-  ('BPS', false), ('Teléfono', false), ('Comisión Handy', false);
+-- Las categorías de gasto las crea la migración 0006.
 
 insert into gasto_fijo (categoria_id, coche_id, descripcion, importe, frecuencia, dia_del_mes, cuotas_total, es_cuota_vehiculo) values
-  (4, 2, 'Cuota Móvil 2', 9800.00, 'mensual', 10, 36, true),
-  (5, null, 'Aporte BPS (monto estimado)', 4500.00, 'mensual', 15, null, false);
+  ((select id from categoria_gasto where nombre = 'Cuota del coche'), 2, 'Cuota Móvil 2', 9800.00, 'mensual', 10, 36, true),
+  ((select id from categoria_gasto where nombre = 'BPS'), null, 'Aporte BPS (monto estimado)', 4500.00, 'mensual', 15, null, false);
 
 insert into gasto (fecha, importe, categoria_id, coche_id, descripcion, estado, fecha_pago, pagado_desde, op_key) values
-  ('2026-10-12', 500.00, 1, 1, 'Nafta', 'pagado', '2026-10-12', 1, 'ej-g1'),
-  ('2026-10-13', 3000.00, 3, 2, 'Seguro de octubre', 'pendiente', null, null, 'ej-g2');
+  ('2026-10-12', 500.00, (select id from categoria_gasto where nombre = 'Combustible'), 1, 'Nafta', 'pagado', '2026-10-12', 1, 'ej-g1'),
+  ('2026-10-13', 3000.00, (select id from categoria_gasto where nombre = 'Seguro'), 2, 'Seguro de octubre', 'pendiente', null, null, 'ej-g2');
 
 insert into vencimiento (gasto_fijo_id, periodo, fecha_vence, importe_estimado, estado) values
   (1, '2026-10', '2026-10-10', 9800.00, 'pendiente'),

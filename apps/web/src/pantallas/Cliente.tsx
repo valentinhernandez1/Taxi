@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router";
 import { api, mensajeDeError } from "../api";
 import { useAjustes } from "../ajustes";
+import { AnularConMotivo } from "../anular";
 import { Aviso, Boton, Pantalla, Tarjeta } from "../componentes";
 import { fechaCorta, haceDias, pesos, useCargar } from "../datos";
 import { FotosComprobante } from "../fotos";
@@ -142,25 +143,6 @@ function Recordatorio({ ficha, alEnviar }: { ficha: FichaCliente; alEnviar: () =
 }
 
 function FilaHistorial({ item, alAnular }: { item: ItemHistorial; alAnular: () => void }) {
-  const [anulando, setAnulando] = useState(false);
-  const [motivo, setMotivo] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [guardando, setGuardando] = useState(false);
-
-  async function anular() {
-    setError(null);
-    setGuardando(true);
-    try {
-      await api(`/${item.tipo === "fiado" ? "fiados" : "cobros"}/${item.id}/anular`, { metodo: "POST", cuerpo: { motivo } });
-      setAnulando(false);
-      alAnular();
-    } catch (e) {
-      setError(mensajeDeError(e));
-    } finally {
-      setGuardando(false);
-    }
-  }
-
   const titulo =
     item.tipo === "fiado"
       ? `Viaje · ${fechaCorta(item.fecha)}`
@@ -198,34 +180,7 @@ function FilaHistorial({ item, alAnular }: { item: ItemHistorial; alAnular: () =
       {item.tipo === "cobro" && !item.anulado && item.origen === "normal" && (
         <FotosComprobante tabla="cobro" registroId={item.id} fotos={item.comprobantes ?? []} alCambiar={alAnular} />
       )}
-      {!item.anulado && !anulando && (
-        <button type="button" onClick={() => setAnulando(true)} className="min-h-12 self-start text-base font-bold text-azul">
-          Anular…
-        </button>
-      )}
-      {anulando && (
-        <div className="flex flex-col gap-2 pt-1">
-          <label className="flex flex-col gap-1 font-bold">
-            ¿Por qué lo anulás?
-            <input
-              value={motivo}
-              onChange={(e) => setMotivo(e.target.value)}
-              autoFocus
-              className="min-h-14 rounded-xl border-2 border-borde px-3 text-lg font-normal"
-              placeholder="Por ejemplo: se anotó dos veces"
-            />
-          </label>
-          {error && <Aviso tipo="error">{error}</Aviso>}
-          <div className="flex gap-2">
-            <Boton variante="peligro" disabled={guardando || motivo.trim().length < 3} onClick={anular} className="min-h-14 text-lg">
-              Anular
-            </Boton>
-            <Boton variante="secundario" onClick={() => setAnulando(false)} className="min-h-14 text-lg">
-              No
-            </Boton>
-          </div>
-        </div>
-      )}
+      {!item.anulado && <AnularConMotivo ruta={`/${item.tipo === "fiado" ? "fiados" : "cobros"}/${item.id}/anular`} alAnular={alAnular} />}
     </div>
   );
 }

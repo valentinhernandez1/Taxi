@@ -383,6 +383,8 @@ export const categoriaGasto = pgTable(
     id: bigserial("id", { mode: "number" }).primaryKey(),
     nombre: text("nombre").notNull(),
     es_de_coche: boolean("es_de_coche").notNull().default(false),
+    /** Cuota de compra de un coche: va aparte de los gastos de funcionamiento (regla 11). */
+    es_cuota_vehiculo: boolean("es_cuota_vehiculo").notNull().default(false),
     activa: boolean("activa").notNull().default(true),
   },
   (t) => [uniqueIndex("categoria_gasto_nombre").on(sql`lower(${t.nombre})`)],
@@ -652,3 +654,10 @@ export const comprobante = pgTable(
     check("comprobante_bytes", sql`${t.bytes} > 0`),
   ],
 );
+
+/** Días que el dueño marcó "no se trabajó": cuentan como cargados (regla 9). */
+export const diaSinTrabajo = pgTable("dia_sin_trabajo", {
+  fecha: dia("fecha").primaryKey(),
+  nota: text("nota"),
+  creado_en: creadoEn(),
+});

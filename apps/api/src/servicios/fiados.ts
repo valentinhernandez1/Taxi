@@ -34,7 +34,7 @@ export async function validarPersona(tx: DbOTx, id: number | null | undefined, q
   if (!p?.activo) throw new ErrorNegocio(`${que} no existe o está dado de baja`);
 }
 
-async function validarCoche(tx: DbOTx, id: number | null | undefined): Promise<void> {
+export async function validarCoche(tx: DbOTx, id: number | null | undefined): Promise<void> {
   if (id == null) return;
   const [c] = await tx.select({ activo: coche.activo }).from(coche).where(eq(coche.id, id));
   if (!c?.activo) throw new ErrorNegocio("Ese coche no existe o está dado de baja");
