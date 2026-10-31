@@ -22,8 +22,11 @@ export const conBaseDeDatos = createMiddleware<AppEnv>(async (c, next) => {
  */
 export const soloJson = createMiddleware<AppEnv>(async (c, next) => {
   if (c.req.method !== "GET" && c.req.method !== "HEAD" && c.req.method !== "OPTIONS") {
-    const tipo = c.req.header("content-type") ?? "";
-    if (!tipo.toLowerCase().startsWith("application/json")) {
+    const tipo = (c.req.header("content-type") ?? "").toLowerCase();
+    // La subida de fotos manda la imagen tal cual: un formulario de otro sitio
+    // tampoco puede mandar estos tipos sin permiso del navegador.
+    const esFoto = /^\/api\/comprobantes\/[a-z]+\/\d+$/.test(c.req.path) && /^image\/(jpeg|png|webp)$/.test(tipo);
+    if (!tipo.startsWith("application/json") && !esFoto) {
       throw new ErrorNegocio("El pedido tiene que ser JSON", 400);
     }
   }

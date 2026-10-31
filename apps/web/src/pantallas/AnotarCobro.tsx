@@ -5,11 +5,13 @@ import { api, ErrorApi, mensajeDeError } from "../api";
 import { Buscador, ElegirDia, leerImporte, MarcoAsistente, Opcion, Pregunta, TecladoImporte } from "../asistente";
 import { Aviso, Boton, Tarjeta } from "../componentes";
 import { fechaCorta, nuevaOpKey, pesos, useCargar } from "../datos";
+import { FotosComprobante } from "../fotos";
 import type { FichaCliente, Persona, ResumenCliente } from "../tipos";
 
 type Paso = "cliente" | "importe" | "medio" | "quien" | "dia" | "resumen" | "listo";
 
 interface Resultado {
+  cobro_id: number;
   cliente: ResumenCliente;
 }
 
@@ -96,6 +98,9 @@ export function AnotarCobro() {
           {resultado.cliente.nombre} {queda === 0 ? "ya no debe nada." : `ahora debe ${pesos(queda)}.`}
           {resultado.cliente.a_favor > 0 && ` Tiene ${pesos(resultado.cliente.a_favor)} a favor.`}
         </Aviso>
+        {medio === "transferencia" && (
+          <FotoDelCobro cobroId={resultado.cobro_id} clienteId={resultado.cliente.id} />
+        )}
         <Boton onClick={() => navegar("/")}>Volver al inicio</Boton>
         <Boton variante="secundario" onClick={otroCobro}>
           Anotar otro cobro
@@ -301,5 +306,18 @@ export function ElegirCliente({
       )}
       {error && <Aviso tipo="error">{error}</Aviso>}
     </>
+  );
+}
+
+/** Después de guardar una transferencia: sacarle foto al comprobante (opcional). */
+function FotoDelCobro({ cobroId, clienteId }: { cobroId: number; clienteId: number }) {
+  const { datos, recargar } = useCargar<FichaCliente>(`/clientes/${clienteId}`);
+  const fotos = datos?.historial.find((h) => h.tipo === "cobro" && h.id === cobroId)?.comprobantes ?? [];
+  return (
+    <Tarjeta className="flex flex-col gap-1 p-4">
+      <span className="font-bold">¿Tenés el comprobante de la transferencia?</span>
+      <span className="text-suave">Sacale una foto y queda guardada con el cobro.</span>
+      <FotosComprobante tabla="cobro" registroId={cobroId} fotos={fotos} alCambiar={recargar} textoBoton="Sacar foto del comprobante" />
+    </Tarjeta>
   );
 }

@@ -9,6 +9,7 @@ Decidida el 30 de octubre de 2026. Costo objetivo: $ 0 por mes. Límites verific
 | Web (PWA) | Cloudflare Workers (archivos estáticos) | `apps/web` compilada con Vite, servida por el mismo Worker que la API. Dirección inicial `taxis.<subdominio>.workers.dev`. Los archivos estáticos no ejecutan el Worker ni cuentan pedidos. *(Cambio de la Etapa 4: antes era Cloudflare Pages; ver `docs/despliegue.md`.)* |
 | API | Cloudflare Workers + Hono | `apps/api`, en la ruta `/api` del mismo dominio, para que la cookie de sesión funcione sin CORS. |
 | Base de datos | Neon (PostgreSQL) | Una rama `main` para producción y otra para pruebas. Conexión con el driver serverless. |
+| Fotos de comprobantes | R2 + Cloudflare Images | Bucket privado `taxis-comprobantes`. Images (plan gratis, 5.000 transformaciones distintas/mes; pasado eso no cobra) achica cada foto una sola vez al subirla. |
 | Copias | GitHub Actions | Tarea diaria: `pg_dump` → cifrado (age o gpg con clave guardada como secret) → artefacto o repo privado de copias. Retener al menos 30 días. |
 | CI | GitHub Actions | En cada push: tipos, lint, Vitest, prueba de copia. En `main`: migraciones en Neon y despliegue del Worker (web + API). |
 | Avisos | Web Push (VAPID) | Disparado por un cron (Cron Trigger de Workers si el plan gratis lo incluye; si no, GitHub Actions llamando a un endpoint protegido). |
@@ -21,6 +22,8 @@ Decidida el 30 de octubre de 2026. Costo objetivo: $ 0 por mes. Límites verific
 | Workers | 100.000 pedidos/día, 10 ms de CPU por pedido | De sobra en volumen. Cuidar el CPU: hash de contraseña liviano, consultas resueltas en la base y no en JS. |
 | Neon | 1 GB por proyecto, 100 CU-hora, se suspende a los 5 min, historial 6 h | Volumen de sobra. Primer pedido tras la pausa con demora corta. Copias propias obligatorias. |
 | Workers (archivos estáticos) | Gratis, no cuentan como pedidos | Sin problema. |
+| R2 | 10 GB, 1 M escrituras y 10 M lecturas por mes | Sobra. Activarlo puede pedir tarjeta. |
+| Images | 5.000 transformaciones distintas por mes | 2 por foto subida. Pasado el límite da error, no cobra. |
 
 ## Descartados
 

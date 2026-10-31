@@ -16,5 +16,9 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
   },
+  // El bucket se crea solo en el despliegue si no existe (hace falta R2 activado en la cuenta).
+  // Images: plan gratis, 5.000 transformaciones distintas por mes; pasado eso no cobra, da error.
+  "r2_buckets": [{ "binding": "COMPROBANTES", "bucket_name": "taxis-comprobantes" }],
+  "images": { "binding": "IMAGES" },
   "observability": { "enabled": true }
 }

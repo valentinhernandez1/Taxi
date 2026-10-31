@@ -28,6 +28,25 @@ No la pegues en ningún archivo del repositorio: va solo en los secrets de GitHu
 3. **Account ID**: en Workers & Pages, columna de la derecha. Copialo.
 4. **Token para GitHub**: arriba a la derecha, tu perfil → **API Tokens** → **Create Token** → plantilla **Edit Cloudflare Workers** → en "Account Resources" elegí tu cuenta → **Continue** → **Create Token**. Copialo (se muestra una sola vez).
 
+## 2b. Fotos de comprobantes (R2 + Images)
+
+La app guarda fotos de comprobantes (por ahora, de los cobros por transferencia) en **R2** y usa **Cloudflare Images** para achicarlas y sacar la miniatura.
+
+1. **Activar R2** (una vez): en el panel, **R2 Object Storage** → **Purchase R2 Plan** / activar. Cloudflare puede pedir una tarjeta aunque no cobre nada mientras se quede dentro de lo gratis. El bucket `taxis-comprobantes` lo crea solo el despliegue.
+2. **Token**: la plantilla "Edit Cloudflare Workers" del paso 2 tiene que incluir **Workers R2 Storage: Edit**. Si el despliegue falla en "Bucket de fotos de comprobantes", agregale ese permiso al token.
+3. **Images** no hay que activarlo: el plan gratis ya incluye las transformaciones.
+
+Qué es gratis (comprobado en la documentación de Cloudflare el 31/10/2026):
+
+| Servicio | Gratis por mes | Uso estimado de la app |
+| --- | --- | --- |
+| R2 | 10 GB guardados, 1 millón de escrituras, 10 millones de lecturas | Una foto ≈ 40–300 KB: miles de fotos por GB |
+| Images | 5.000 transformaciones distintas | 2 por foto subida (copia + miniatura); ver las fotos no cuenta |
+
+Si algún mes se pasara de las 5.000 transformaciones, Images **no cobra**: da error, y la app guarda la foto igual, sin miniatura. Para pasar de lo gratis en R2 habría que guardar más de 10 GB, que son decenas de miles de fotos.
+
+**Las fotos no entran en la copia diaria** (que es de la base). R2 guarda varias copias de cada archivo y la app nunca borra fotos (solo las marca anuladas), pero si se quiere una copia propia hay que agregarla aparte (pendiente).
+
 ## 3. Clave de las copias (age)
 
 ```powershell

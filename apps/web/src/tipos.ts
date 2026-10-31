@@ -31,6 +31,7 @@ export interface ItemHistorial {
   recibido_por?: string | null;
   aplicado?: { viaje_id: number; fecha: string; importe: Centesimos }[];
   a_favor?: Centesimos;
+  comprobantes?: { id: number; miniatura: boolean }[];
 }
 
 export interface FichaCliente {

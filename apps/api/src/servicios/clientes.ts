@@ -17,6 +17,7 @@ import { ErrorNegocio } from "../errores";
 import { leerAjustes } from "./ajustes";
 import { registrarAuditoria } from "./auditoria";
 import { hoy } from "./comun";
+import { comprobantesDe } from "./comprobantes";
 
 export interface DatosCliente {
   nombre: string;
@@ -163,6 +164,7 @@ export interface MovimientoFicha {
   recibido_por?: string | null;
   aplicado?: { viaje_id: number; fecha: string; importe: Centesimos }[];
   a_favor?: Centesimos;
+  comprobantes?: { id: number; miniatura: boolean }[];
 }
 
 /** Ficha del cliente: datos, saldo y la historia de viajes fiados y pagos (más nuevo arriba). */
@@ -214,6 +216,7 @@ export async function fichaCliente(db: DbOTx, id: number) {
         .orderBy(asc(viaje.fecha), asc(viaje.id))
     : [];
   const anulados = new Set(cobros.filter((c) => c.anulado).map((c) => c.id));
+  const fotos = await comprobantesDe(db, "cobro", cobros.map((c) => c.id));
 
   const pagadoPorViaje = new Map<number, number>();
   for (const i of imputaciones) {
@@ -259,6 +262,7 @@ export async function fichaCliente(db: DbOTx, id: number) {
         nota: c.nota,
         aplicado,
         a_favor: (c.anulado ? 0 : importe - aplicado.reduce((s, a) => s + a.importe, 0)) as Centesimos,
+        comprobantes: fotos.get(c.id) ?? [],
         creado: c.creado_en.getTime(),
       };
     }),

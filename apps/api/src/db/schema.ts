@@ -619,3 +619,36 @@ export const auditoria = pgTable(
     index("auditoria_fecha").on(t.fecha),
   ],
 );
+
+// ---------------------------------------------------------------- Comprobantes
+
+/**
+ * Fotos de comprobantes (transferencias, tickets de gastos). El archivo vive en
+ * R2; acá queda de qué registro es. Nada se borra: se anula con motivo.
+ */
+export const comprobante = pgTable(
+  "comprobante",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    tabla: text("tabla").notNull(),
+    registro_id: bigint("registro_id", { mode: "number" }).notNull(),
+    /** Clave en R2 de la foto normalizada (máx. 1.600 px, sin datos ocultos). */
+    clave: text("clave").notNull(),
+    /** Clave en R2 de la miniatura; vacía si Images no estaba disponible al subir. */
+    clave_miniatura: text("clave_miniatura"),
+    tipo: text("tipo").notNull(),
+    bytes: integer("bytes").notNull(),
+    ancho: integer("ancho"),
+    alto: integer("alto"),
+    op_key: opKey(),
+    ...anulacion,
+    creado_en: creadoEn(),
+  },
+  (t) => [
+    uniqueIndex("comprobante_op_key").on(t.op_key),
+    uniqueIndex("comprobante_clave").on(t.clave),
+    index("comprobante_registro").on(t.tabla, t.registro_id),
+    check("comprobante_tabla", sql`${t.tabla} in ('cobro', 'gasto')`),
+    check("comprobante_bytes", sql`${t.bytes} > 0`),
+  ],
+);

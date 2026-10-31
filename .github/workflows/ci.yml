@@ -132,6 +132,18 @@ jobs:
       - name: Migraciones en Neon
         if: steps.config.outputs.listo == 'true'
         run: pnpm db:migrate
+      - name: Bucket de fotos de comprobantes (R2)
+        if: steps.config.outputs.listo == 'true'
+        working-directory: apps/api
+        run: |
+          if pnpm exec wrangler r2 bucket info taxis-comprobantes >/dev/null 2>&1; then
+            echo "El bucket taxis-comprobantes ya existe."
+          elif pnpm exec wrangler r2 bucket create taxis-comprobantes --location enam; then
+            echo "Bucket taxis-comprobantes creado."
+          else
+            echo "::error::No se pudo crear el bucket de R2. Activá R2 en el panel de Cloudflare y revisá que el token tenga 'Workers R2 Storage: Edit' (docs/despliegue.md)."
+            exit 1
+          fi
       - name: Build de la web
         if: steps.config.outputs.listo == 'true'
         run: pnpm --filter @taxis/web build

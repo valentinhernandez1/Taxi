@@ -7,6 +7,7 @@ import { conBaseDeDatos, soloJson } from "./middleware";
 import { rutasAjustes } from "./rutas/ajustes";
 import { rutasAuth } from "./rutas/auth";
 import { rutasClientes } from "./rutas/clientes";
+import { rutasComprobantes } from "./rutas/comprobantes";
 import { rutasCoches, rutasPersonas } from "./rutas/flota";
 import { rutasCobros, rutasFiados } from "./rutas/movimientos";
 
@@ -49,3 +50,4 @@ app.route("/fiados", rutasFiados);
 app.route("/cobros", rutasCobros);
 app.route("/personas", rutasPersonas);
 app.route("/coches", rutasCoches);
+app.route("/comprobantes", rutasComprobantes);
