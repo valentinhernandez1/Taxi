@@ -80,6 +80,8 @@ export const ICONOS = {
   llave: "M15 7a4 4 0 1 1-3.9 5H3v3h3v3h3v-3h2.1A4 4 0 0 1 15 7z",
   salir: "M10 17l-5-5 5-5M5 12h12M14 4h5v16h-5",
   flecha: "M9 6l6 6-6 6",
+  auto: "M4 16h16v-4l-2-5H6l-2 5zM8 17a2 2 0 1 0 0 .01M16 17a2 2 0 1 0 0 .01",
+  personas: "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-5-5",
 } as const;
 
 const PESTANAS = [

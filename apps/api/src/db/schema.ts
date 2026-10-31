@@ -48,6 +48,8 @@ export const tipoPersona = pgEnum("tipo_persona", ["dueno", "chofer", "telefonis
 export const formaPago = pgEnum("forma_pago", ["efectivo", "tarjeta", "fiado"]);
 export const origenViaje = pgEnum("origen_viaje", ["normal", "carga_inicial"]);
 export const medioCobro = pgEnum("medio_cobro", ["efectivo", "transferencia"]);
+/** carga_inicial: pagos anotados en las hojas de papel; no mueven plata de hoy. */
+export const origenCobro = pgEnum("origen_cobro", ["normal", "carga_inicial"]);
 export const tipoCuenta = pgEnum("tipo_cuenta", ["caja", "banco", "handy", "a_entregar", "externo"]);
 export const estadoGasto = pgEnum("estado_gasto", ["pendiente", "pagado"]);
 export const frecuenciaGasto = pgEnum("frecuencia_gasto", [
@@ -236,8 +238,12 @@ export const cobro = pgTable(
       .references(() => cliente.id),
     fecha: dia("fecha").notNull(),
     importe: dinero("importe").notNull(),
-    medio: medioCobro("medio").notNull(),
+    /** Nulo solo en la carga inicial (pagos viejos de la hoja de papel). */
+    medio: medioCobro("medio"),
+    /** Quién recibió el efectivo; nulo = el dueño (va a la caja). */
     recibido_por_id: bigint("recibido_por_id", { mode: "number" }).references(() => persona.id),
+    origen: origenCobro("origen").notNull().default("normal"),
+    nota: text("nota"),
     op_key: opKey(),
     ...anulacion,
     creado_en: creadoEn(),
@@ -246,6 +252,7 @@ export const cobro = pgTable(
     uniqueIndex("cobro_op_key").on(t.op_key),
     index("cobro_cliente").on(t.cliente_id),
     check("cobro_importe_positivo", sql`${t.importe} > 0`),
+    check("cobro_medio", sql`${t.origen} = 'carga_inicial' or ${t.medio} is not null`),
   ],
 );
 
@@ -278,6 +285,8 @@ export const cuenta = pgTable(
   },
   (t) => [
     uniqueIndex("cuenta_por_persona").on(t.tipo, t.persona_id),
+    // Una sola caja, un banco, un Handy y un "afuera" (las de persona van aparte).
+    uniqueIndex("cuenta_base_unica").on(t.tipo).where(sql`${t.persona_id} is null`),
     check(
       "cuenta_a_entregar_con_persona",
       sql`(${t.tipo} = 'a_entregar') = (${t.persona_id} is not null)`,

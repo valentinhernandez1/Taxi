@@ -8,6 +8,8 @@ export function Mas() {
   return (
     <Pantalla titulo="Más">
       <Tarjeta>
+        <FilaMenu a="/mas/personas" icono={ICONOS.personas} texto="Choferes y personal" />
+        <FilaMenu a="/mas/coches" icono={ICONOS.auto} texto="Coches" />
         <FilaMenu a="/mas/ajustes" icono={ICONOS.ajustes} texto="Ajustes" />
         <FilaMenu a="/mas/contrasena" icono={ICONOS.llave} texto="Cambiar contraseña" />
         <FilaMenu

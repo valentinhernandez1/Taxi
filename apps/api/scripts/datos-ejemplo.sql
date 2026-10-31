@@ -17,11 +17,8 @@ insert into cliente (nombre, telefono, limite_fiado) values
   ('Cliente Pérez (ejemplo)', '099100002', null),
   ('Almacén de ejemplo', null, 5000.00);
 
+-- Las cuentas base (1 caja, 2 banco, 3 handy, 4 afuera) las crea la migración 0003.
 insert into cuenta (tipo, persona_id, nombre) values
-  ('caja', null, 'Caja del dueño'),
-  ('banco', null, 'Banco'),
-  ('handy', null, 'A acreditar por Handy'),
-  ('externo', null, 'Afuera (clientes y proveedores)'),
   ('a_entregar', 2, 'Tiene Chofer Uno'),
   ('a_entregar', 3, 'Tiene Chofer Dos'),
   ('a_entregar', 5, 'Tiene la telefonista');

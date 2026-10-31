@@ -16,7 +16,7 @@
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @taxis/api db:migrate",
     "db:generate": "pnpm --filter @taxis/api db:generate",
-    "db:ejemplo": "psql \"${DATABASE_URL:-postgres://taxis:taxis@localhost:5432/taxis}\" -v ON_ERROR_STOP=1 -f apps/api/scripts/datos-ejemplo.sql",
+    "db:ejemplo": "pnpm --filter @taxis/api db:ejemplo",
     "dueno:crear": "pnpm --filter @taxis/api dueno:crear",
     "copia:probar": "scripts/probar-copia.sh"
   },
