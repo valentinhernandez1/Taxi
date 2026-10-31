@@ -1,0 +1,54 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Empleados y pagos</title><style>
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap');
+:root{--blue:#0B57A4;--blue2:#08427D;--bluebg:#E6EFF9;--bg:#F3F5F7;--white:#fff;--border:#D5DCE3;--text:#15202B;--muted:#4A5866;--line:#E6EAEE;--green:#1B6E3F;--yellow:#FFF2D6;--yb:#E8C67A;--yt:#6B4100;--red:#B3261E;--redbg:#FBE4E2}
+*{box-sizing:border-box}html,body{margin:0;background:#e8edf2;color:var(--text);font-family:'Atkinson Hyperlegible',Arial,sans-serif}
+body{padding:18px;display:flex;justify-content:center;align-items:flex-start}
+.phone{width:390px;height:844px;min-height:844px;background:var(--bg);border:1px solid #cbd3dc;border-radius:26px;overflow:hidden;box-shadow:0 16px 42px #15202b22;display:flex;flex-direction:column;position:relative;flex:none}
+.status{height:28px;flex:none;padding:5px 20px 0;display:flex;justify-content:space-between;font-size:13px;font-weight:700}
+.header{padding:13px 20px 12px;flex:none}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.back{border:0;background:none;color:var(--blue);font:700 16px 'Atkinson Hyperlegible';padding:4px 0;display:flex;gap:6px;align-items:center}
+.kicker{font-size:14px;color:var(--muted);font-weight:700}.month{font-size:14px;color:var(--blue);background:var(--bluebg);padding:7px 10px;border-radius:9px}
+h1{font-size:28px;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.35px}h2{font-size:20px;margin:0 0 9px}
+.sub{font-size:16px;color:var(--muted);margin:5px 0 0;line-height:1.3}
+.content{padding:0 16px 14px;overflow:auto;min-height:0;flex:1;scrollbar-width:none}.content::-webkit-scrollbar{display:none}
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:11px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted)}.small{font-size:14px}.big{font-size:28px;font-weight:700;line-height:1.1}.medium{font-size:20px;font-weight:700}
+.label{font-size:14px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.divider{height:1px;background:var(--line);margin:11px 0}
+.tag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:700;background:var(--bluebg);color:var(--blue)}
+.tag.green{background:#E7F2EB;color:var(--green)}.tag.yellow{background:var(--yellow);border:1px solid var(--yb);color:var(--yt)}.tag.red{background:var(--redbg);color:var(--red)}
+.warning{background:var(--yellow);border:1px solid var(--yb);border-radius:12px;padding:10px 12px;color:var(--yt);font-size:14px;line-height:1.3;margin-bottom:11px}
+.warning strong{display:block;font-size:15px;margin-bottom:2px}
+.item{padding:11px 0;border-top:1px solid var(--line)}.item:first-child{border-top:0;padding-top:2px}
+.item-title{font-size:17px;font-weight:700}.item-sub{font-size:14px;color:var(--muted);margin-top:3px;line-height:1.25}
+.iconbox{width:38px;height:38px;border-radius:11px;background:var(--bluebg);color:var(--blue);display:grid;place-items:center;flex:none}
+.iconbox svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.linkrow{display:flex;align-items:center;gap:10px}.arrow{font-size:24px;color:#71808e}
+.footer{background:#fff;border-top:1px solid var(--border);padding:10px 16px 16px;flex:none}
+.primary{height:64px;width:100%;border:0;border-radius:14px;background:var(--blue);color:#fff;font:700 18px 'Atkinson Hyperlegible';cursor:pointer}
+.secondary{height:50px;width:100%;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--blue);font:700 17px 'Atkinson Hyperlegible';margin-top:8px}
+.nav{height:58px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);flex:none;padding:4px 5px 8px}
+.navitem{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--muted)}
+.navitem svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.navitem.active{color:var(--blue)}
+.metric{background:#F7F9FA;border-radius:10px;padding:10px}.metric .value{font-size:20px;font-weight:700;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.listrow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--line);gap:10px}
+.listrow:first-child{border-top:0;padding-top:0}
+.person{display:flex;align-items:center;gap:10px;min-width:0}.avatar{width:40px;height:40px;border-radius:50%;background:var(--bluebg);color:var(--blue);display:grid;place-items:center;font-weight:700;font-size:16px;flex:none}
+.money{font-size:17px;font-weight:700;white-space:nowrap}
+.pill{font-size:12px;padding:4px 7px;border-radius:20px;background:#eef1f4;color:var(--muted);font-weight:700}
+.assistant{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+.stepnote{width:390px;text-align:center;font-size:15px;color:var(--muted);font-weight:700;margin:0 0 8px}
+.wizard .header{padding-top:12px}.progress{height:5px;background:#dce3ea;border-radius:5px;margin-top:12px;overflow:hidden}.progress span{display:block;height:100%;background:var(--blue);border-radius:5px}
+.question{font-size:25px;font-weight:700;line-height:1.18;margin:4px 0 7px}
+.choice{display:flex;align-items:center;gap:12px;border:1px solid var(--border);background:white;border-radius:13px;padding:13px;margin-bottom:9px;min-height:66px;font-size:18px;font-weight:700}
+.choice .iconbox{width:40px;height:40px}.choice .check{margin-left:auto;color:var(--blue);font-size:21px}
+.inputbox{background:#fff;border:1px solid var(--border);border-radius:13px;padding:13px;font-size:16px}
+.amount{font-size:34px;font-weight:700;text-align:center;padding:13px;margin:7px 0 12px;background:#fff;border:1px solid var(--border);border-radius:13px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.key{height:54px;background:#fff;border:1px solid var(--border);border-radius:11px;font-size:23px;font-weight:700;color:var(--text);display:grid;place-items:center}
+.note{font-size:14px;color:var(--muted);line-height:1.3}
+.summaryline{font-size:17px;line-height:1.42}.summaryline strong{font-weight:700}
+@media(max-width:420px){body{padding:0;background:var(--bg)}.phone{width:100vw;height:100dvh;min-height:760px;border:0;border-radius:0;box-shadow:none}}
+</style></head><body><div class="phone "><div class="status"><span>9:41</span><span>●●● ▰</span></div><header class="header"><div class="top"><span class="kicker">Taxis de ejemplo</span><span class="month">Octubre 2026</span></div><h1>Empleados y pagos</h1><p class="sub">Personas en planilla y pagos anotados.</p></header><main class="content"><div class="card"><div class="row"><span class="label">Pagos a empleados en octubre</span><span class="tag">Ejemplo</span></div><div class="big">$ 72.500</div><div class="item-sub">Total de pagos anotados este mes</div></div>
+<div class="card"><h2>Personas en planilla</h2><div class="listrow"><div class="person"><div class="avatar">AN</div><div><div class="item-title">Ana (ejemplo)</div><div class="item-sub">Telefonista · mensual</div></div></div><div class="money">$ 28.000</div></div><div class="listrow"><div class="person"><div class="avatar">RO</div><div><div class="item-title">Roberto (ejemplo)</div><div class="item-sub">Telefonista suplente · jornal</div></div></div><div class="money">$ 12.500</div></div><div class="listrow"><div class="person"><div class="avatar">EL</div><div><div class="item-title">Elena (ejemplo)</div><div class="item-sub">Administración · mensual</div></div></div><div class="money">$ 32.000</div></div></div><div class="card"><h2>Pagos por concepto</h2><div class="listrow"><span>Sueldo</span><strong>$ 48.000</strong></div><div class="listrow"><span>Jornal</span><strong>$ 12.500</strong></div><div class="listrow"><span>Adelanto</span><strong>$ 2.000</strong></div><div class="listrow"><span>Aguinaldo</span><strong>$ 5.000</strong></div><div class="listrow"><span>Salario vacacional</span><strong>$ 5.000</strong></div></div><div class="card"><div class="row"><div><div class="label">Aguinaldo estimado acumulado</div><div class="big">$ 18.600</div></div><span class="tag yellow">Estimado</span></div><p class="note">Es un cálculo aproximado, no un pago realizado.</p></div></main><footer class="footer"><button class="primary">＋  Anotar pago a un empleado</button></footer><nav class="nav"><div class="navitem "><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>Inicio</span></div><div class="navitem "><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M17 8h4m-2-2v4M17 16h4"/></svg><span>Deben</span></div><div class="navitem active"><svg viewBox="0 0 24 24"><path d="M3 6.5A2.5 2.5 0 0 1 5.5 4H21v16H5.5A2.5 2.5 0 0 1 3 17.5z"/><path d="M3 7h18M16 13h2"/></svg><span>Plata</span></div><div class="navitem "><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 14l4-4 3 3 6-7"/></svg><span>Ganancia</span></div><div class="navitem "><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg><span>Más</span></div></nav></div></body></html>
