@@ -28,7 +28,7 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 ## Stack
 
 - Monorepo TypeScript (pnpm workspaces): `apps/web` (React + Vite + Tailwind, PWA), `apps/api` (**Hono** sobre Cloudflare Workers), `packages/shared` (esquemas Zod y reglas de dinero como funciones puras).
-- PostgreSQL en **Neon** + Drizzle ORM con **postgres.js por TCP** (decidido en la Etapa 2: mismo driver en local y en Neon, sin proxy; se cambia solo en `apps/api/src/db/cliente.ts`). SQL explícito para vistas de saldos. En desarrollo, Postgres local con Docker Compose.
+- PostgreSQL en **Neon** + Drizzle ORM con el driver serverless de Neon (SQL explícito para vistas de saldos). En desarrollo, Postgres local con Docker Compose.
 - Auth: sesión en cookie httpOnly, segura y SameSite; hash de contraseña con WebCrypto (PBKDF2) o el que entre en el límite de CPU de Workers; límite de intentos.
 - Pruebas: Vitest (reglas y API, con `@cloudflare/vitest-pool-workers` para la API) y Playwright (flujos en viewport de celular).
 - Infraestructura (todo en planes gratuitos, detalle en `docs/infraestructura.md`): Cloudflare Pages (web), Cloudflare Workers (API), Neon (base), GitHub Actions (copias diarias cifradas con `pg_dump` y CI), Web Push para avisos.
@@ -49,6 +49,5 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 ## Estado actual
 
 - Etapa 1 (prototipo) hecha: ver `prototipo/`. Son mockups en formato `.dc.html` (HTML + una clase JS de lógica); sirven como referencia visual y de flujo, **no** son código a reutilizar.
-- Etapa 2 (base del proyecto) hecha en local: monorepo, modelo de datos y migraciones, login (PBKDF2 20.000 iteraciones, medido), ajustes, auditoría inmutable, copias cifradas con restauración probada, CI. Decisiones y guía en `README.md`. Falta desplegar (Neon, Cloudflare) y medir el CPU real del login.
-- Próximo paso: **Etapa 3 — clientes, fiados y cobros** + carga inicial.
+- Próximo paso: **Etapa 2 — base del proyecto** (repo, base de datos, migraciones, login, ajustes, auditoría, copias y restauración).
 - Hay pendientes para confirmar con el dueño (lista al final de la especificación). Mientras tanto, todo eso va configurable.

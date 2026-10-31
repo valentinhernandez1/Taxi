@@ -1,14 +1,7 @@
 node_modules/
 dist/
-dev-dist/
-.wrangler/
 .env
 .env.*
 !.env.example
-.dev.vars
 *.dump
-*.dump.age
 backups/
-copias/
-# Claves de age para las copias: nunca al repositorio.
-clave-copias*.txt
