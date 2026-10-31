@@ -165,7 +165,9 @@ jobs:
           URL: ${{ steps.desplegar.outputs.url }}
         run: |
           set -euo pipefail
-          curl -fsS "$URL/api/salud"
+          # La primera vez, la dirección *.workers.dev tarda unos segundos en
+          # propagarse (da 404): se reintenta hasta ~1 minuto antes de fallar.
+          curl -fsS --retry 12 --retry-delay 5 --retry-all-errors "$URL/api/salud"
           # Un login con un email que no existe tiene que dar 401: prueba que el Worker
           # se conecta a Neon (TLS incluido). Cualquier otra cosa es un problema.
           estado="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/api/auth/login" \
