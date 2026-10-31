@@ -11,7 +11,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrar.ts",
     "dueno:crear": "tsx scripts/crear-dueno.ts",
-    "medir-hash": "tsx scripts/medir-hash.ts"
+    "medir-hash": "tsx scripts/medir-hash.ts",
+    "db:ejemplo": "tsx scripts/cargar-ejemplo.ts"
   },
   "dependencies": {
     "@taxis/shared": "workspace:*",

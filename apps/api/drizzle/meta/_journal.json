@@ -15,6 +15,20 @@
       "when": 1793412488735,
       "tag": "0001_auditoria_inmutable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793414491823,
+      "tag": "0002_cobros_carga_inicial",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793414492781,
+      "tag": "0003_vistas_saldos",
+      "breakpoints": true
     }
   ]
 }

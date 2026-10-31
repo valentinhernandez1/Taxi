@@ -45,6 +45,32 @@ pnpm dev              # API en :8787 (wrangler) y web en :5173 (vite, con /api p
 
 Abrí http://localhost:5173 y entrá con el email y la contraseña que creaste.
 
+### En Windows (PowerShell)
+
+1. Instalá Node 22 y Docker Desktop (y dejalo abierto):
+   ```powershell
+   winget install OpenJS.NodeJS.LTS
+   winget install Docker.DockerDesktop
+   ```
+2. Cerrá y abrí PowerShell, y activá pnpm (si da error de permisos, abrí PowerShell como administrador):
+   ```powershell
+   corepack enable
+   ```
+   Si `corepack` no anda: `npm install -g pnpm@10`.
+3. Desde la carpeta del repo, los mismos pasos de arriba, pero copiando los archivos con `Copy-Item`:
+   ```powershell
+   pnpm install
+   Copy-Item .env.example .env
+   Copy-Item .env.example apps/api/.dev.vars
+   pnpm db:up
+   pnpm db:migrate
+   pnpm db:ejemplo
+   pnpm dueno:crear -- dueno@ejemplo.uy
+   pnpm dev
+   ```
+
+Todo eso anda igual en Windows. Los scripts de copias (`scripts/*.sh`) son de bash: corren en Git Bash o WSL, y además el CI los prueba en cada push.
+
 ### Comandos
 
 | Comando | Qué hace |
@@ -75,6 +101,22 @@ Abrí http://localhost:5173 y entrá con el email y la contraseña que creaste.
 4. **Auditoría** escrita por los servicios en la misma transacción que el cambio, con antes, después y motivo. Un trigger de la base rechaza `UPDATE` y `DELETE` sobre `auditoria`.
 5. **Modelo de datos completo** (§5 de la especificación) en la primera migración, con `CHECK` para las reglas que la base puede garantizar sola: importes > 0, fiado con cliente, `op_key` único, diferencia de entrega = esperado − entregado. Se agregaron `sesion`, `intento_login` y `acreditacion_handy_viaje` (los viajes de cada acreditación). Las vistas de saldos llegan con su módulo.
 6. **Ajustes** como `clave → valor JSON`, validados con Zod en `packages/shared`. Los no guardados usan su valor por defecto y cada cambio queda en la auditoría.
+
+## Etapa 3: clientes, fiados y cobros
+
+Pantallas: **Quién debe** (total, colores por antigüedad, búsqueda), **ficha del cliente** (saldo, viajes y pagos, anular con motivo, recordatorio por WhatsApp, límite), **Anotar cobro** y **Anotar fiado** (una pregunta por pantalla, resumen antes de guardar), **hoja de papel** (carga inicial) y **Choferes y personal / Coches** en Más.
+
+1. **Saldos calculados, nunca escritos** (regla 5). Las vistas `fiado_pendiente` y `saldo_cliente` (migración 0003) calculan lo que debe cada viaje y cada cliente desde viajes, cobros e imputaciones. Anular un cobro lo saca de la cuenta sin borrar nada.
+2. **FIFO** con `imputarFIFO` de `packages/shared`: la API la usa para guardar y la web para mostrar el resumen "se descuenta de lo más viejo" antes de guardar; calculan lo mismo.
+3. **Los cobros ya mueven plata** (tabla `movimiento`): de "afuera" a la caja (lo recibió el dueño), al banco (transferencia) o a lo que tiene que entregar la persona que lo recibió (caso 7). Así, cuando llegue la pantalla de Plata (Etapa 5), la historia desde el primer día de uso real ya está. Anular un cobro agrega el movimiento inverso. Las cuentas base (caja, banco, Handy, afuera) las crea la migración 0003.
+4. **Pago mayor que la deuda** (caso 4): la API responde 409 y pide confirmación; confirmado, queda a favor y se usa sola en el próximo fiado. **Límite de fiado** (caso 20): igual, 409 con aviso y se guarda solo si el dueño confirma.
+5. **Doble envío** (caso 5): cada asistente genera un `op_key` al empezar; si el mismo pedido llega dos veces (incluso a la vez) queda uno solo.
+6. **Carga inicial**: los renglones de la hoja entran como viajes `carga_inicial` (no suman a la facturación del mes ni a liquidaciones, caso 15) y los pagos anotados como cobros `carga_inicial`, que no mueven plata de hoy. No se guarda nada si los renglones menos los pagos no dan el total que dice la hoja.
+7. **Alertas**: amarillo y rojo por días desde el fiado más viejo sin pagar (30 y 60 por defecto, en Ajustes). Si el cliente tiene plazo propio, pasa a rojo al vencerse y a amarillo la semana antes.
+8. **Anular un fiado** que ya tiene pagos aplicados no se deja: primero se anulan esos cobros (si no, los pagos quedarían colgando).
+9. **Quién recibió la plata**: "Vos" (el dueño) va a la caja; para elegir a otra persona hay que darla de alta en Más → Choferes y personal.
+
+**Listo cuando** (especificación §8): las pruebas de fiados pasan (`apps/api/test/fiados.test.ts`, casos 1–7, 14, 15 y 20) y **dos hojas reales de prueba coinciden con el papel**. Esto último lo tiene que hacer el dueño con dos hojas suyas, en la base de prueba.
 
 ## Copias y restauración
 

@@ -25,6 +25,10 @@ export async function limpiarBase(): Promise<void> {
     );
     const tablas = rows.map((r) => `"${r.tablename}"`).join(", ");
     if (tablas) await db.execute(sql.raw(`truncate ${tablas} restart identity cascade`));
+    // Las cuentas base las crea la migración 0003; el truncate las borró.
+    await db.execute(sql`insert into cuenta (tipo, persona_id, nombre) values
+      ('caja', null, 'Caja del dueño'), ('banco', null, 'Banco'),
+      ('handy', null, 'A acreditar por Handy'), ('externo', null, 'Afuera (clientes y proveedores)')`);
   });
 }
 

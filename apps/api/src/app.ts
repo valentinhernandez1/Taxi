@@ -5,11 +5,14 @@ import { ErrorNegocio } from "./errores";
 import { conBaseDeDatos, soloJson } from "./middleware";
 import { rutasAjustes } from "./rutas/ajustes";
 import { rutasAuth } from "./rutas/auth";
+import { rutasClientes } from "./rutas/clientes";
+import { rutasCoches, rutasPersonas } from "./rutas/flota";
+import { rutasCobros, rutasFiados } from "./rutas/movimientos";
 
 export const app = new Hono<AppEnv>().basePath("/api");
 
 app.onError((error, c) => {
-  if (error instanceof ErrorNegocio) return c.json({ error: error.message }, error.estado);
+  if (error instanceof ErrorNegocio) return c.json({ error: error.message, ...error.datos }, error.estado);
   if (error instanceof ZodError) {
     return c.json({ error: error.issues[0]?.message ?? "Los datos no son válidos" }, 400);
   }
@@ -26,3 +29,8 @@ app.get("/salud", (c) => c.json({ ok: true }));
 app.use("*", soloJson, conBaseDeDatos);
 app.route("/auth", rutasAuth);
 app.route("/ajustes", rutasAjustes);
+app.route("/clientes", rutasClientes);
+app.route("/fiados", rutasFiados);
+app.route("/cobros", rutasCobros);
+app.route("/personas", rutasPersonas);
+app.route("/coches", rutasCoches);

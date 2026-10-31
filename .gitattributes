@@ -1,0 +1,3 @@
+* text=auto
+# Los scripts de bash tienen que quedar con saltos de línea de Linux, también al clonar en Windows.
+*.sh text eol=lf

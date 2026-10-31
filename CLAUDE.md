@@ -50,5 +50,6 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 
 - Etapa 1 (prototipo) hecha: ver `prototipo/`. Son mockups en formato `.dc.html` (HTML + una clase JS de lógica); sirven como referencia visual y de flujo, **no** son código a reutilizar.
 - Etapa 2 (base del proyecto) hecha en local: monorepo, modelo de datos y migraciones, login (PBKDF2 20.000 iteraciones, medido), ajustes, auditoría inmutable, copias cifradas con restauración probada, CI. Decisiones y guía en `README.md`. Falta desplegar (Neon, Cloudflare) y medir el CPU real del login.
-- Próximo paso: **Etapa 3 — clientes, fiados y cobros** + carga inicial.
+- Etapa 3 (clientes, fiados, cobros y carga inicial) hecha en local; ver la sección en `README.md`. Falta que el dueño pase dos hojas reales de prueba y coincidan con el papel.
+- Próximo paso: **Etapa 4 — uso real 1** (desplegar y que el dueño use fiados y cobros); después Etapa 5, viajes y plata.
 - Hay pendientes para confirmar con el dueño (lista al final de la especificación). Mientras tanto, todo eso va configurable.

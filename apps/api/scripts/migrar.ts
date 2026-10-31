@@ -7,7 +7,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { opcionesConexion } from "../src/db/cliente";
 import { urlDeLaBase } from "./entorno";
 
@@ -22,7 +22,8 @@ export async function migrar(url: string): Promise<void> {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Comparar como URL: en Windows argv[1] es "C:\\..." y no "file:///C:/...".
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const url = urlDeLaBase();
   await migrar(url);
   console.log(`Migraciones aplicadas en ${new URL(url).host}${new URL(url).pathname}`);
