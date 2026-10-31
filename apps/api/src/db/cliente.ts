@@ -27,8 +27,19 @@ export function opcionesConexion(): postgres.Options<Record<string, never>> {
   };
 }
 
+/**
+ * Neon agrega `channel_binding=require` a la cadena de conexión. postgres.js no
+ * lo conoce y lo mandaría al servidor como parámetro de sesión, que lo rechaza.
+ * El canal ya va cifrado con `sslmode=require`.
+ */
+export function normalizarUrl(url: string): string {
+  const u = new URL(url);
+  u.searchParams.delete("channel_binding");
+  return u.toString();
+}
+
 export function conectar(url: string): { db: Db; cerrar: () => Promise<void> } {
-  const sql = postgres(url, opcionesConexion());
+  const sql = postgres(normalizarUrl(url), opcionesConexion());
   return {
     db: drizzle(sql, { schema }),
     cerrar: () => sql.end({ timeout: 5 }),

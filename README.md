@@ -178,10 +178,10 @@ OK: 30 tablas iguales en filas y totales.
 Copia y restauración probadas.
 ```
 
-## Pendiente para publicar (todavía no se despliega)
+## Publicar
 
-- [ ] Crear el proyecto en Neon, anotar la región y cargar `DATABASE_URL` como secret del Worker.
-- [ ] Desplegar API y web con la ruta `/api` del Worker en el mismo dominio que Pages.
-- [ ] Medir el CPU real del login en Cloudflare.
-- [ ] Confirmar si Cron Triggers entra en el plan gratis (para los avisos).
-- [ ] Cargar los secrets de la copia diaria y bajar/restaurar la primera copia real en una base de prueba.
+Guía paso a paso (Neon, Cloudflare, secrets de GitHub, usuario del dueño, celular y verificaciones): **[docs/despliegue.md](docs/despliegue.md)**.
+
+Resumen: un solo Worker (`apps/api/wrangler.produccion.jsonc`) sirve la web y la API en el mismo dominio. En cada push a `main` con todo en verde, el CI aplica las migraciones en Neon, compila la web y despliega (job "Desplegar a producción"). Mientras no estén cargados los secrets, ese job avisa y no hace nada.
+
+Seguridad en producción: cookie `Secure`/`HttpOnly`/`SameSite=Strict`, CSP estricta en la web (`apps/web/public/_headers`, todo del mismo dominio) y en la API (`default-src 'none'`), `Cache-Control: no-store` en la API, HSTS.

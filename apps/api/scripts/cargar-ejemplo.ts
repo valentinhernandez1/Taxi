@@ -5,10 +5,10 @@
  */
 import postgres from "postgres";
 import { readFileSync } from "node:fs";
-import { opcionesConexion } from "../src/db/cliente";
+import { normalizarUrl, opcionesConexion } from "../src/db/cliente";
 import { urlDeLaBase } from "./entorno";
 
-const sql = postgres(urlDeLaBase(), opcionesConexion());
+const sql = postgres(normalizarUrl(urlDeLaBase()), opcionesConexion());
 try {
   const [fila] = await sql<{ n: number }[]>`select count(*)::int as n from cliente`;
   if ((fila?.n ?? 0) > 0) {

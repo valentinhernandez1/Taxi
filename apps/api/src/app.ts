@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { secureHeaders } from "hono/secure-headers";
 import { ZodError } from "zod";
 import type { AppEnv } from "./env";
 import { ErrorNegocio } from "./errores";
@@ -22,6 +23,20 @@ app.onError((error, c) => {
 });
 
 app.notFound((c) => c.json({ error: "No existe" }, 404));
+
+// La API solo devuelve JSON: nada se embebe, nada se guarda en caché (son datos de plata).
+app.use(
+  "*",
+  secureHeaders({
+    contentSecurityPolicy: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] },
+    strictTransportSecurity: "max-age=31536000",
+    referrerPolicy: "same-origin",
+  }),
+  async (c, next) => {
+    await next();
+    c.header("Cache-Control", "no-store");
+  },
+);
 
 /** Sin base de datos: sirve para ver que el Worker responde. */
 app.get("/salud", (c) => c.json({ ok: true }));

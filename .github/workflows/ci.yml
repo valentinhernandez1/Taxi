@@ -3,6 +3,9 @@ name: CI
 on:
   push:
   pull_request:
+  # Para desplegar a mano (Actions → CI → Run workflow, rama main), por ejemplo
+  # después de cargar los secrets de producción.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -86,3 +89,77 @@ jobs:
         env:
           ADMIN_URL: postgres://taxis:taxis@localhost:5432/postgres
         run: scripts/probar-copia.sh
+
+  desplegar:
+    name: Desplegar a producción
+    # Solo en main, y solo si pasaron todas las pruebas y la prueba de copia.
+    needs: [verificar, copia]
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # En Settings → Environments → produccion se puede exigir aprobación antes de desplegar.
+    environment: produccion
+    concurrency:
+      group: desplegar
+      cancel-in-progress: false
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCCION }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: ¿Está configurado?
+        id: config
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::Faltan secrets de producción (ver docs/despliegue.md); no se despliega."
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v5
+        if: steps.config.outputs.listo == 'true'
+      - uses: pnpm/action-setup@v4
+        if: steps.config.outputs.listo == 'true'
+      - uses: actions/setup-node@v5
+        if: steps.config.outputs.listo == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - if: steps.config.outputs.listo == 'true'
+        run: pnpm install --frozen-lockfile
+      # Primero la base: las migraciones son solo de agregar (nada destructivo, CLAUDE.md),
+      # así la versión anterior del Worker sigue andando mientras se despliega la nueva.
+      - name: Migraciones en Neon
+        if: steps.config.outputs.listo == 'true'
+        run: pnpm db:migrate
+      - name: Build de la web
+        if: steps.config.outputs.listo == 'true'
+        run: pnpm --filter @taxis/web build
+      - name: Desplegar el Worker (web + API)
+        if: steps.config.outputs.listo == 'true'
+        id: desplegar
+        working-directory: apps/api
+        run: |
+          set -euo pipefail
+          secretos="$RUNNER_TEMP/secretos.json"
+          node -e 'require("fs").writeFileSync(process.argv[1], JSON.stringify({ DATABASE_URL: process.env.DATABASE_URL }))' "$secretos"
+          pnpm exec wrangler deploy -c wrangler.produccion.jsonc --secrets-file "$secretos" | tee "$RUNNER_TEMP/deploy.log"
+          rm -f "$secretos"
+          url="$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' "$RUNNER_TEMP/deploy.log" | head -1)"
+          echo "url=${url:-${{ vars.URL_PRODUCCION }}}" >> "$GITHUB_OUTPUT"
+      - name: Comprobar que responde y llega a la base
+        if: steps.config.outputs.listo == 'true' && steps.desplegar.outputs.url != ''
+        env:
+          URL: ${{ steps.desplegar.outputs.url }}
+        run: |
+          set -euo pipefail
+          curl -fsS "$URL/api/salud"
+          # Un login con un email que no existe tiene que dar 401: prueba que el Worker
+          # se conecta a Neon (TLS incluido). Cualquier otra cosa es un problema.
+          estado="$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/api/auth/login" \
+            -H 'content-type: application/json' \
+            -d '{"email":"comprobacion-despliegue@ejemplo.invalid","password":"x"}')"
+          echo "login de prueba: $estado"
+          test "$estado" = "401"
+          curl -fsS -o /dev/null "$URL/"
+          echo "Publicado en $URL"
