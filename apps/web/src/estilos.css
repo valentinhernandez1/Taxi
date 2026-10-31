@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@fontsource/atkinson-hyperlegible/400.css";
+@import "@fontsource/atkinson-hyperlegible/700.css";
+
+/* Colores del prototipo: cada color tiene un solo significado (verde bien, amarillo atención, rojo urgente). */
+@theme {
+  --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --color-fondo: #f3f5f7;
+  --color-tinta: #15202b;
+  --color-suave: #4a5866;
+  --color-borde: #d5dce3;
+  --color-separador: #e6eaee;
+  --color-azul: #0b57a4;
+  --color-azul-oscuro: #08427d;
+  --color-azul-claro: #e6eff9;
+  --color-verde: #1b6e3f;
+  --color-amarillo-fondo: #fff2d6;
+  --color-amarillo-borde: #e8c67a;
+  --color-amarillo-texto: #6b4100;
+  --color-rojo: #b3261e;
+  --color-rojo-fondo: #fbe4e2;
+}
+
+/* Letra base 18 px: todo lo que está en rem crece en proporción. */
+html {
+  font-size: 18px;
+}
+
+body {
+  @apply bg-fondo text-tinta font-sans antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-azul);
+  outline-offset: 2px;
+}

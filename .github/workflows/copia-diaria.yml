@@ -1,0 +1,93 @@
+name: Copia diaria
+
+# Copia cifrada de la base de producción (Neon), todos los días.
+# Antes de cifrarla se restaura en un Postgres descartable y se compara contra
+# producción, así cada copia guardada está probada. Secrets necesarios:
+#   DATABASE_URL_PRODUCCION  cadena de conexión de Neon (sin pooler)
+#   AGE_RECIPIENT            clave PÚBLICA de age (la privada queda fuera de GitHub)
+# Mientras no estén cargados, el workflow avisa y termina sin hacer nada.
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # 03:17 en Uruguay
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: copia-diaria
+  cancel-in-progress: false
+
+jobs:
+  copia:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      prueba:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: prueba
+          POSTGRES_PASSWORD: prueba
+          POSTGRES_DB: restaurada
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prueba -d restaurada"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCCION }}
+      AGE_RECIPIENT: ${{ secrets.AGE_RECIPIENT }}
+      RESTAURADA_URL: postgres://prueba:prueba@localhost:5432/restaurada
+    steps:
+      - name: ¿Está configurada?
+        id: config
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$AGE_RECIPIENT" ]; then
+            echo "::notice::Faltan los secrets DATABASE_URL_PRODUCCION y/o AGE_RECIPIENT; no hay copia que hacer todavía."
+            echo "lista=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "lista=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v5
+        if: steps.config.outputs.lista == 'true'
+
+      - name: Instalar age y cliente de Postgres 17
+        if: steps.config.outputs.lista == 'true'
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq age postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Volcar y probar la restauración
+        if: steps.config.outputs.lista == 'true'
+        run: |
+          set -euo pipefail
+          pg_dump --format=custom --no-owner --no-acl "$DATABASE_URL" --file "$RUNNER_TEMP/copia.dump"
+          pg_restore --no-owner --no-acl --exit-on-error --single-transaction \
+            --dbname "$RESTAURADA_URL" "$RUNNER_TEMP/copia.dump"
+          scripts/verificar-copia.sh "$DATABASE_URL" "$RESTAURADA_URL"
+
+      - name: Cifrar
+        if: steps.config.outputs.lista == 'true'
+        id: cifrar
+        run: |
+          set -euo pipefail
+          mkdir -p copias
+          nombre="taxis_$(TZ=America/Montevideo date +%Y-%m-%d_%H%M).dump.age"
+          age --encrypt --recipient "$AGE_RECIPIENT" --output "copias/$nombre" "$RUNNER_TEMP/copia.dump"
+          rm -f "$RUNNER_TEMP/copia.dump"
+          echo "nombre=$nombre" >> "$GITHUB_OUTPUT"
+
+      - name: Guardar la copia (30 días)
+        if: steps.config.outputs.lista == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.cifrar.outputs.nombre }}
+          path: copias/${{ steps.cifrar.outputs.nombre }}
+          retention-days: 30
+          if-no-files-found: error
+          compression-level: 0
