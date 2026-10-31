@@ -27,11 +27,13 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 
 ## Stack
 
-- Monorepo TypeScript (pnpm workspaces): `apps/web` (React + Vite + Tailwind, PWA), `apps/api` (Node + Fastify), `packages/shared` (esquemas Zod y reglas de dinero como funciones puras).
-- PostgreSQL + Drizzle ORM (SQL explícito para vistas de saldos).
-- Auth: sesión en cookie httpOnly, contraseña con argon2, límite de intentos.
-- Pruebas: Vitest (reglas y API) y Playwright (flujos en viewport de celular).
-- Hosting: planes gratuitos (verificar límites antes de elegir). Copia diaria con `pg_dump` + guía de restauración probada.
+- Monorepo TypeScript (pnpm workspaces): `apps/web` (React + Vite + Tailwind, PWA), `apps/api` (**Hono** sobre Cloudflare Workers), `packages/shared` (esquemas Zod y reglas de dinero como funciones puras).
+- PostgreSQL en **Neon** + Drizzle ORM con el driver serverless de Neon (SQL explícito para vistas de saldos). En desarrollo, Postgres local con Docker Compose.
+- Auth: sesión en cookie httpOnly, segura y SameSite; hash de contraseña con WebCrypto (PBKDF2) o el que entre en el límite de CPU de Workers; límite de intentos.
+- Pruebas: Vitest (reglas y API, con `@cloudflare/vitest-pool-workers` para la API) y Playwright (flujos en viewport de celular).
+- Infraestructura (todo en planes gratuitos, detalle en `docs/infraestructura.md`): Cloudflare Pages (web), Cloudflare Workers (API), Neon (base), GitHub Actions (copias diarias cifradas con `pg_dump` y CI), Web Push para avisos.
+- Restricciones a respetar: Workers gratis = 10 ms de CPU por pedido y 100.000 pedidos/día; sin APIs de Node que Workers no soporte; Neon gratis = 1 GB, se suspende a los 5 min sin uso y guarda solo 6 h de historial (por eso las copias propias son obligatorias).
+- Todo con PostgreSQL estándar, sin depender de funciones propietarias, para poder mudarse de proveedor sin reescribir.
 - No agregar servicios pagos sin explicar costo y pedir aprobación.
 
 ## Forma de trabajo

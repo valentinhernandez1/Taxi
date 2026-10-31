@@ -164,7 +164,7 @@ Criterios: barra inferior con 5 pestañas (Inicio, Deben, Plata, Ganancia, Más)
 
 ## 7. Arquitectura
 
-Ver `CLAUDE.md` (stack). Backend: rutas (validan) → servicios (reglas, transacción, movimientos, auditoría) → repositorio. Reglas de dinero (FIFO, liquidaciones, saldos, sugerencias) como funciones puras en `packages/shared` con pruebas propias. Seguridad: HTTPS, límite de intentos de login, secretos fuera del repo, datos reales solo en producción.
+Ver `CLAUDE.md` (stack) y `docs/infraestructura.md`. Web en Cloudflare Pages, API Hono en Cloudflare Workers, base PostgreSQL en Neon, copias y CI en GitHub Actions. Backend: rutas (validan) → servicios (reglas, transacción, movimientos, auditoría) → repositorio. Reglas de dinero (FIFO, liquidaciones, saldos, sugerencias) como funciones puras en `packages/shared` con pruebas propias. Seguridad: HTTPS, límite de intentos de login, secretos fuera del repo, datos reales solo en producción.
 
 ## 8. Plan por etapas
 
