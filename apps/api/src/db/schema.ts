@@ -381,6 +381,39 @@ export const acreditacionHandyViaje = pgTable(
   (t) => [primaryKey({ columns: [t.acreditacion_id, t.viaje_id] })],
 );
 
+/**
+ * Fiado que no se va a cobrar nunca. No se borra nada: el viaje y sus pagos
+ * quedan; lo que faltaba pagar deja de contarse como deuda (vista
+ * fiado_pendiente) y se cuenta como pérdida en la ganancia. Según la regla del
+ * chofer, se le descuenta su parte o la empresa la absorbe.
+ */
+export const fiadoIncobrable = pgTable(
+  "fiado_incobrable",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    viaje_id: bigint("viaje_id", { mode: "number" })
+      .notNull()
+      .references(() => viaje.id),
+    fecha: dia("fecha").notNull(),
+    /** Lo que faltaba pagar cuando se marcó. */
+    importe: dinero("importe").notNull(),
+    chofer_id: bigint("chofer_id", { mode: "number" }).references(() => persona.id),
+    /** Regla A + "se descuenta al chofer": su parte adelantada, que se le descuenta. */
+    descuento_chofer: dinero("descuento_chofer").notNull().default("0"),
+    /** Regla B + "lo absorbe la empresa": su parte, que se le paga igual. */
+    parte_a_pagar: dinero("parte_a_pagar").notNull().default("0"),
+    /** Liquidación en que se aplicó el descuento o se pagó la parte. */
+    liquidacion_id: bigint("liquidacion_id", { mode: "number" }).references((): AnyPgColumn => liquidacion.id),
+    motivo: text("motivo").notNull(),
+    ...anulacion,
+    creado_en: creadoEn(),
+  },
+  (t) => [
+    uniqueIndex("fiado_incobrable_viaje").on(t.viaje_id).where(sql`not ${t.anulado}`),
+    check("fiado_incobrable_importe", sql`${t.importe} > 0`),
+  ],
+);
+
 // ---------------------------------------------------------------- Gastos
 
 export const categoriaGasto = pgTable(
@@ -552,6 +585,8 @@ export const liquidacion = pgTable(
     adelantos_fiado: dinero("adelantos_fiado").notNull(),
     /** Regla B: parte de fiados viejos que ya se cobraron, pagada en esta liquidación. */
     parte_fiados_cobrados: dinero("parte_fiados_cobrados").notNull().default("0"),
+    /** Descuentos por fiados incobrables (regla A + "se descuenta al chofer"). */
+    descuentos: dinero("descuentos").notNull().default("0"),
     gastos: dinero("gastos").notNull(),
     esperado: dinero("esperado").notNull(),
     entregado: dinero("entregado").notNull(),

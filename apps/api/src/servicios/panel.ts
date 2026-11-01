@@ -101,12 +101,16 @@ export async function gananciaDelMes(db: Db, periodo: string) {
     from gasto g join categoria_gasto c on c.id = g.categoria_id
     where not g.anulado and g.fecha between ${desde} and ${hasta}`);
   const choferes = await parteDeChoferes(db, desde, hasta);
+  const [inc] = await db.execute<{ total: string }>(
+    sql`select coalesce(sum(importe), 0)::text as total from fiado_incobrable where not anulado and fecha between ${desde} and ${hasta}`,
+  );
   const datos = {
     facturado,
     parte_choferes: choferes.total,
     gastos_coches: n(g!.coches),
     gastos_generales: centesimos(n(g!.generales) + n(g!.empleados)),
     cuotas: n(g!.cuotas),
+    incobrables: n(inc?.total),
     dias_del_mes: dias,
   };
 

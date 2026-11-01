@@ -211,6 +211,7 @@ export function Liquidacion() {
                 <Fila texto="Su parte" valor={pesos(cuenta.parte_turno + cuenta.adelanto_fiados)} />
                 {cuenta.adelanto_fiados > 0 && <span className="text-base text-suave">Incluye {pesos(cuenta.adelanto_fiados)} adelantados de fiados que todavía no se cobraron.</span>}
                 {cuenta.parte_fiados_cobrados > 0 && <Fila texto="Su parte de fiados que ya pagaron" valor={pesos(cuenta.parte_fiados_cobrados)} />}
+                {cuenta.descuentos > 0 && <Fila texto="Descuento por fiados que no se cobran" valor={`− ${pesos(cuenta.descuentos)}`} />}
                 <hr className="my-1 w-full border-separador" />
                 <Fila texto="Plata que tiene" valor={pesos(turno.plata_en_mano)} />
                 {montoGasto > 0 && <Fila texto="Menos lo que pagó" valor={`− ${pesos(montoGasto)}`} />}

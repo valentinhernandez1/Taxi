@@ -28,6 +28,8 @@ export interface DatosTurno {
   gastos: Centesimos;
   /** Lo que tiene en mano para entregar antes de liquidar (viajes en efectivo, cobros recibidos…). */
   plata_en_mano: Centesimos;
+  /** Fiados incobrables con regla "se descuenta al chofer": su parte adelantada, que se le descuenta. */
+  descuentos?: Centesimos;
 }
 
 export interface CuentaLiquidacion {
@@ -40,7 +42,9 @@ export interface CuentaLiquidacion {
   pendiente_fiados: Centesimos;
   /** Regla B: su parte de fiados viejos que ya se cobraron. */
   parte_fiados_cobrados: Centesimos;
-  /** Todo lo que se le paga en esta liquidación. */
+  /** Lo que se le descuenta por fiados incobrables. */
+  descuentos: Centesimos;
+  /** Todo lo que se le paga en esta liquidación (ya descontado). */
   parte_total: Centesimos;
   /**
    * Lo que te tiene que entregar: plata en mano − gastos − su parte.
@@ -73,13 +77,15 @@ export function calcularLiquidacion(regla: ReglaLiquidacion, t: DatosTurno): Cue
   const parte_turno = centesimos(aplicarPorcentaje(centesimos(t.efectivo + t.tarjeta), pct) + jornal(regla));
   const adelanto_fiados = regla.momento_fiado === "A" ? parteFiados : centesimos(0);
   const pendiente_fiados = regla.momento_fiado === "B" ? parteFiados : centesimos(0);
-  const parte_total = centesimos(parte_turno + adelanto_fiados + t.fiados_cobrados);
+  const descuentos = t.descuentos ?? centesimos(0);
+  const parte_total = centesimos(parte_turno + adelanto_fiados + t.fiados_cobrados - descuentos);
   return {
     facturado,
     parte_turno,
     adelanto_fiados,
     pendiente_fiados,
     parte_fiados_cobrados: t.fiados_cobrados,
+    descuentos,
     parte_total,
     esperado: centesimos(t.plata_en_mano - t.gastos - parte_total),
   };

@@ -161,6 +161,7 @@ export function FichaChofer() {
               <span className="text-base text-suave">
                 Su parte {pesos(l.parte_chofer)}
                 {l.adelantos_fiado > 0 ? ` (adelanto de fiados ${pesos(l.adelantos_fiado)})` : ""}
+                {l.descuentos > 0 ? ` · descuento por incobrables ${pesos(l.descuentos)}` : ""}
                 {l.gastos > 0 ? ` · pagó ${pesos(l.gastos)}` : ""} ·{" "}
                 {l.esperado >= 0 ? `entregó ${pesos(l.entregado)}` : `le pagaste ${pesos(-l.esperado)}`}
               </span>

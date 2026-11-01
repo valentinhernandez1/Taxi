@@ -44,6 +44,13 @@ describe("liquidación", () => {
     expect(c.esperado).toBe($("1010"));
   });
 
+  it("un fiado incobrable con regla 'se descuenta al chofer' le baja la parte", () => {
+    const c = calcularLiquidacion(treinta("A"), { ...turno, descuentos: $("300") });
+    expect(c.parte_total).toBe($("840"));
+    expect(c.descuentos).toBe($("300"));
+    expect(c.esperado).toBe($("1160"));
+  });
+
   it("jornal, mixto y sueldo", () => {
     const base = { porcentaje_puntos: null, modo_entrega: "se_queda_su_parte", momento_fiado: "A" } as const;
     expect(calcularLiquidacion({ ...base, tipo: "jornal", jornal: $("1200") }, turno).parte_total).toBe($("1200"));

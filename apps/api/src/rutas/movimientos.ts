@@ -6,6 +6,7 @@ import { requiereSesion, soloDueno } from "../middleware";
 import { anotarCobro, anularCobro } from "../servicios/cobros";
 import { esquemaDia, esquemaId, esquemaImporte, esquemaMotivo, esquemaOpKey, hoy } from "../servicios/comun";
 import { anotarFiado, anularFiado } from "../servicios/fiados";
+import { anularIncobrable, marcarIncobrable } from "../servicios/incobrables";
 
 export const rutasFiados = new Hono<AppEnv>();
 rutasFiados.use(requiereSesion, soloDueno);
@@ -25,9 +26,20 @@ rutasFiados.post("/", async (c) => {
   return c.json(resultado, resultado.repetido ? 200 : 201);
 });
 
-rutasFiados.post("/:id/anular", async (c) => {
+rutasFiados.post("/:id{[0-9]+}/anular", async (c) => {
   const { motivo } = z.object({ motivo: esquemaMotivo }).parse(await c.req.json());
   return c.json(await anularFiado(c.var.db, c.var.usuario.id, esquemaId.parse(c.req.param("id")), motivo));
+});
+
+/** Fiado que no se va a cobrar nunca (con motivo; no se borra nada). */
+rutasFiados.post("/:id{[0-9]+}/incobrable", async (c) => {
+  const { motivo } = z.object({ motivo: esquemaMotivo }).parse(await c.req.json());
+  return c.json(await marcarIncobrable(c.var.db, c.var.usuario.id, esquemaId.parse(c.req.param("id")), motivo), 201);
+});
+
+rutasFiados.post("/incobrables/:id{[0-9]+}/anular", async (c) => {
+  const { motivo } = z.object({ motivo: esquemaMotivo }).parse(await c.req.json());
+  return c.json(await anularIncobrable(c.var.db, c.var.usuario.id, esquemaId.parse(c.req.param("id")), motivo));
 });
 
 export const rutasCobros = new Hono<AppEnv>();

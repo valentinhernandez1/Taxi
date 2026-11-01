@@ -71,6 +71,13 @@
       "when": 1793538501134,
       "tag": "0009_turnos_base",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793539561686,
+      "tag": "0010_incobrables",
+      "breakpoints": true
     }
   ]
 }

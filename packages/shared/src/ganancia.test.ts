@@ -29,6 +29,12 @@ describe("ganancia del mes (ejemplo del prototipo)", () => {
     expect(c.equilibrio_por_dia).toBe($("7842.86"));
     expect(c.real_por_dia).toBe($("9633.33"));
   });
+  it("los fiados que no se van a cobrar bajan la ganancia", () => {
+    const c = cuentaDelMes({ ...datos, incobrables: $("1000") });
+    expect(c.ganancia_negocio).toBe($("46400"));
+    expect(c.de_cada_100!.choferes + c.de_cada_100!.coches + c.de_cada_100!.generales + c.de_cada_100!.queda).toBe(100);
+  });
+
   it("sin facturación no hay reparto", () => {
     expect(cuentaDelMes({ ...datos, facturado: $("0"), parte_choferes: $("0") }).de_cada_100).toBeNull();
   });

@@ -12,7 +12,7 @@ import {
 } from "@taxis/shared";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import type { Db, DbOTx } from "../db/cliente";
-import { cliente, cobro, coche, imputacion, persona, viaje } from "../db/schema";
+import { cliente, cobro, coche, imputacion, persona, viaje, fiadoIncobrable } from "../db/schema";
 import { ErrorNegocio } from "../errores";
 import { leerAjustes } from "./ajustes";
 import { registrarAuditoria } from "./auditoria";
@@ -159,6 +159,8 @@ export interface MovimientoFicha {
   nota?: string | null;
   pagado?: Centesimos;
   pendiente?: Centesimos;
+  /** Si se marcó como que no se va a cobrar. */
+  incobrable?: { id: number; importe: Centesimos; motivo: string; fecha: string } | null;
   // Cobro
   medio?: "efectivo" | "transferencia" | null;
   recibido_por?: string | null;
@@ -218,6 +220,14 @@ export async function fichaCliente(db: DbOTx, id: number) {
   const anulados = new Set(cobros.filter((c) => c.anulado).map((c) => c.id));
   const fotos = await comprobantesDe(db, "cobro", cobros.map((c) => c.id));
 
+  const marcados = fiados.length
+    ? await db
+        .select()
+        .from(fiadoIncobrable)
+        .where(and(inArray(fiadoIncobrable.viaje_id, fiados.map((f) => f.id)), eq(fiadoIncobrable.anulado, false)))
+    : [];
+  const incobrablePorViaje = new Map(marcados.map((m) => [m.viaje_id, m]));
+
   const pagadoPorViaje = new Map<number, number>();
   for (const i of imputaciones) {
     if (anulados.has(i.cobro_id)) continue;
@@ -240,7 +250,15 @@ export async function fichaCliente(db: DbOTx, id: number) {
         coche: f.coche,
         nota: f.nota,
         pagado,
-        pendiente: (f.anulado ? 0 : importe - pagado) as Centesimos,
+        pendiente: (f.anulado ? 0 : importe - pagado - desdeNumeric(incobrablePorViaje.get(f.id)?.importe ?? "0")) as Centesimos,
+        incobrable: incobrablePorViaje.has(f.id)
+          ? {
+              id: incobrablePorViaje.get(f.id)!.id,
+              importe: desdeNumeric(incobrablePorViaje.get(f.id)!.importe),
+              motivo: incobrablePorViaje.get(f.id)!.motivo,
+              fecha: incobrablePorViaje.get(f.id)!.fecha,
+            }
+          : null,
         creado: f.creado_en.getTime(),
       };
     }),
