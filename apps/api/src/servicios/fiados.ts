@@ -131,6 +131,9 @@ export async function anularFiado(db: Db, usuarioId: number, viajeId: number, mo
     if (!v) throw new ErrorNegocio("Ese viaje fiado no existe", 404);
     await bloquearCliente(tx, v.cliente_id!);
     if (v.anulado) return { cliente_id: v.cliente_id! };
+    if (v.liquidacion_id) {
+      throw new ErrorNegocio("Este fiado ya está en la liquidación de un turno. Para anularlo, primero anulá esa liquidación.");
+    }
     const pagos = await tx
       .select({ id: cobro.id })
       .from(imputacion)

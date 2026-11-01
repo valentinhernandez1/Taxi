@@ -198,3 +198,65 @@ export interface FichaCoche {
   proximos_vencimientos: Vencimiento[];
   cobertura: Cobertura;
 }
+
+export interface Regla {
+  id: number;
+  chofer_id: number;
+  tipo: "porcentaje" | "jornal" | "sueldo" | "mixto";
+  porcentaje_puntos: number | null;
+  jornal: Centesimos | null;
+  modo_entrega: "entrega_todo" | "se_queda_su_parte";
+  momento_fiado: "A" | "B";
+  incobrable: "empresa" | "chofer";
+  confirmada: boolean;
+  vigente_desde: string;
+}
+
+export interface ChoferResumen {
+  id: number;
+  nombre: string;
+  telefono: string | null;
+  regla: Regla | null;
+  para_entregar: Centesimos;
+  viajes_sin_liquidar: number;
+  sin_liquidar_desde: string | null;
+}
+
+export interface LiquidacionHecha {
+  id: number;
+  fecha: string;
+  facturado: Centesimos;
+  parte_chofer: Centesimos;
+  adelantos_fiado: Centesimos;
+  parte_fiados_cobrados: Centesimos;
+  gastos: Centesimos;
+  esperado: Centesimos;
+  entregado: Centesimos;
+  diferencia: Centesimos;
+  nota: string | null;
+  estado: "confirmada" | "anulada";
+  motivo_anulacion: string | null;
+  regla_confirmada: boolean;
+}
+
+export interface CuentaDelTurno {
+  chofer: { id: number; nombre: string };
+  regla: Regla | null;
+  viajes: {
+    cantidades: { efectivo: number; tarjeta: number; fiado: number };
+    totales: { efectivo: Centesimos; tarjeta: Centesimos; fiado: Centesimos };
+    desde: string | null;
+    hasta: string | null;
+  };
+  fiados_cobrados: number;
+  plata_en_mano: Centesimos;
+  cuenta: {
+    facturado: Centesimos;
+    parte_turno: Centesimos;
+    adelanto_fiados: Centesimos;
+    pendiente_fiados: Centesimos;
+    parte_fiados_cobrados: Centesimos;
+    parte_total: Centesimos;
+    esperado: Centesimos;
+  } | null;
+}

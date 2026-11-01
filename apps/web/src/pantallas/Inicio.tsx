@@ -44,6 +44,7 @@ export function Inicio() {
         <BotonInicio a="/cobro" icono={ICONOS.plata} texto="Anotar cobro" principal />
         <BotonInicio a="/fiado" icono={ICONOS.auto} texto="Anotar fiado" />
         <BotonInicio a="/gasto" icono={ICONOS.recibo} texto="Anotar gasto" />
+        <BotonInicio a="/liquidacion" icono={ICONOS.personas} texto="Liquidar turno" />
       </div>
 
       {deben && (

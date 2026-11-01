@@ -146,6 +146,21 @@ Pantallas: **Anotar gasto** (¿qué gasto? → ¿de qué coche? → ¿qué día?
 
 **Pruebas**: `apps/api/test/gastos.test.ts` (casos 13 y 19, con qué plata, anulaciones, doble envío, categorías, vencimientos, empleados, ficha de coche) y `packages/shared/src/gastos.test.ts`.
 
+## Etapa 7: liquidación de choferes
+
+Pantallas: **Liquidar turno** (Inicio; ¿qué chofer terminó? → ¿están todos los viajes? → ¿pagó algo con la plata del turno? → la cuenta según su regla → ¿cuánto entregó? → resumen), **Choferes y liquidaciones** (Más: lista con la regla de cada uno, "Sin confirmar", lo que tiene para entregar y los viajes sin liquidar), **ficha del chofer** (regla vigente y futuras, confirmar, liquidaciones con anular) y **cómo se le paga** (formulario de la regla).
+
+1. **Cálculo puro** en `packages/shared/src/liquidacion.ts` (la API lo usa para guardar y la web lo muestra): porcentaje, jornal, mixto o sueldo; "se queda con su parte" o "entrega todo y se le paga" (el neto es el mismo); fiados A (se le adelanta su parte, se muestra aparte, caso 10) o B (se le paga cuando el cliente termina de pagar, caso 11); combustible pagado con la plata del turno (caso 12).
+2. **Qué entra**: los viajes del chofer que todavía no se liquidaron (`viaje.liquidacion_id` nulo) hasta el día de la liquidación. Mientras no haya turnos (Etapa 9) se liquida "lo que tenga sin liquidar"; con turnos se va a poder elegir el turno.
+3. **La plata**: lo que tiene que entregar sale de su saldo real (viajes en efectivo, cobros que recibió, lo que pagó) menos su parte. Su parte sale como `movimiento` ("parte_chofer"), lo que entrega va a la caja y la diferencia queda con nota. Si da negativo, la empresa le paga de la caja. Después de liquidar, su saldo queda en cero.
+4. **Reglas con vigencia** (regla 12): cada regla rige desde una fecha; una nueva o cambiada queda **sin confirmar** hasta que el dueño la confirma en la ficha, y las liquidaciones hechas con una regla sin confirmar lo muestran. Una regla que ya se usó no se cambia: se carga otra desde otra fecha.
+5. **Anular una liquidación** (con motivo) revierte su plata, anula el gasto del turno y deja los viajes otra vez sin liquidar. Mientras esté vigente, sus viajes, fiados y su gasto no se pueden anular sueltos.
+6. **Doble envío**: si la misma liquidación llega dos veces a la vez, la segunda espera el bloqueo del chofer y devuelve la primera.
+7. **Pendiente para confirmar con el dueño**: qué pasa con un fiado que no se cobra nunca (empresa o chofer) queda guardado en la regla, pero todavía no hay forma de marcar un fiado como incobrable; y la regla B paga la parte del chofer cuando el cliente termina de pagar ese viaje (no en pagos parciales).
+8. Migración 0008: `viaje.liquidacion_id`, `viaje.parte_fiado_liquidacion_id`, `gasto.liquidacion_id`, y en `liquidacion`: `parte_fiados_cobrados`, `nota`, `anulado_en`, `motivo_anulacion`. Solo agrega.
+
+**Pruebas**: `apps/api/test/liquidacion.test.ts` (casos 10, 11 y 12, nota por diferencia, la empresa le paga, sin regla, jornal, doble envío, anular, reglas con vigencia y confirmación) y `packages/shared/src/liquidacion.test.ts`.
+
 ## Fotos de comprobantes (R2 + Cloudflare Images)
 
 En la ficha del cliente, cada cobro tiene "Agregar foto del comprobante", y al terminar un cobro por transferencia la app ofrece sacarle foto.

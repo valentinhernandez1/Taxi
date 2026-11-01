@@ -5,6 +5,7 @@ import { AnotarCobro } from "./pantallas/AnotarCobro";
 import { AnotarFiado } from "./pantallas/AnotarFiado";
 import { AnotarGasto } from "./pantallas/AnotarGasto";
 import { AnotarViaje } from "./pantallas/AnotarViaje";
+import { Choferes, FichaChofer, ReglaForm } from "./pantallas/Choferes";
 import { Empleados, PagoEmpleado } from "./pantallas/Empleados";
 import { FichaCoche } from "./pantallas/FichaCoche";
 import { GastosDelMes, PagarVencimiento, Vencimientos } from "./pantallas/Gastos";
@@ -15,6 +16,7 @@ import { Cliente } from "./pantallas/Cliente";
 import { ClienteForm } from "./pantallas/ClienteForm";
 import { Coches, Personas } from "./pantallas/Flota";
 import { Inicio } from "./pantallas/Inicio";
+import { Liquidacion } from "./pantallas/Liquidacion";
 import { Login } from "./pantallas/Login";
 import { Mas } from "./pantallas/Mas";
 import { AcreditarHandy, Plata, RecibirPlata } from "./pantallas/Plata";
@@ -58,6 +60,9 @@ export function App() {
           <Route path="/mas/categorias" element={<Categorias />} />
           <Route path="/mas/empleados" element={<Empleados />} />
           <Route path="/mas/coches/:id" element={<FichaCoche />} />
+          <Route path="/mas/choferes" element={<Choferes />} />
+          <Route path="/mas/choferes/:id" element={<FichaChofer />} />
+          <Route path="/mas/choferes/:id/regla" element={<ReglaForm />} />
           <Route path="/ganancia" element={<Proximamente titulo="Ganancia" etapa="panel y ganancia" />} />
           <Route path="/mas" element={<Mas />} />
           <Route path="/mas/ajustes" element={<Ajustes />} />
@@ -74,6 +79,7 @@ export function App() {
         <Route path="/gasto" element={<AnotarGasto />} />
         <Route path="/vencimientos/:id/pagar" element={<PagarVencimiento />} />
         <Route path="/pago-empleado" element={<PagoEmpleado />} />
+        <Route path="/liquidacion" element={<Liquidacion />} />
         <Route path="/plata/recibir/:id" element={<RecibirPlata />} />
         <Route path="/plata/handy" element={<AcreditarHandy />} />
       </Routes>
