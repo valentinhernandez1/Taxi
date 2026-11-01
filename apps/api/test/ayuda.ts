@@ -34,6 +34,8 @@ export async function limpiarBase(): Promise<void> {
       ('Combustible', true, false), ('Taller', true, false), ('Seguro', true, false),
       ('Cuota del coche', true, true), ('BPS', false, false), ('Comisión Handy', false, false),
       ('Otro gasto', false, false)`);
+    // Y los horarios de turno de la migración 0009.
+    await db.execute(sql`insert into plantilla_turno (nombre, hora_inicio, hora_fin) values ('Día', '06:00', '18:00'), ('Noche', '18:00', '06:00')`);
   });
 }
 

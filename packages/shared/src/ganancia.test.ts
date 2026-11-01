@@ -96,6 +96,16 @@ describe("dónde ganar más", () => {
     expect(sug.map((s) => s.titulo)).toEqual(["Pagá a tiempo", "Falta un coche los viernes de noche"]);
   });
 
+  it("turnos sin chofer: vacíos × promedio del turno × margen", () => {
+    const [s] = generarSugerencias({
+      ...vacio,
+      turnos_vacios: [{ coche: "Móvil 2", plantilla: "Noche", vacios: 6, promedio_turno: $("2350") }],
+      margen: 0.454,
+    });
+    expect(s).toMatchObject({ titulo: "Cubrí el turno noche del Móvil 2", tipo: "gana", monto: "≈ $ 6.401 / mes" });
+    expect(generarSugerencias({ ...vacio, turnos_vacios: [{ coche: "Móvil 2", plantilla: "Noche", vacios: 1, promedio_turno: $("2350") }], margen: 0.5 })).toEqual([]);
+  });
+
   it("sin llamadas anotadas, invita a anotarlas", () => {
     expect(generarSugerencias({ ...vacio, llamadas: [] })[0]?.clave).toBe("llamadas");
   });

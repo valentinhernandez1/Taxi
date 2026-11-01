@@ -41,6 +41,10 @@ export interface DatosSugerencias {
   categorias: { id: number; nombre: string; mes: Centesimos; anteriores: Centesimos[] }[];
   vencidos: { descripcion: string; dias: number }[];
   llamadas: { fecha: string; hora: string | null }[];
+  /** Turnos que quedaron sin chofer en el mes (solo si se usan los turnos). */
+  turnos_vacios?: { coche: string; plantilla: string; vacios: number; promedio_turno: Centesimos }[];
+  /** Lo que queda de cada $ 1 facturado después de chofer y combustible (0 a 1). */
+  margen?: number;
 }
 
 const $ = (c: number) => formatearImporte(centesimos(Math.round(c)), { sinDecimales: true });
@@ -181,8 +185,29 @@ function llamadas(lista: DatosSugerencias["llamadas"]): Sugerencia | null {
   };
 }
 
+function turnosVacios(d: DatosSugerencias): Sugerencia[] {
+  const margen = Math.max(0, Math.min(1, d.margen ?? 0));
+  return (d.turnos_vacios ?? [])
+    .filter((t) => t.vacios >= 2 && t.promedio_turno > 0 && margen > 0)
+    // Es una estimación: se redondea a pesos.
+    .map((t) => ({ ...t, deja: Math.round((t.vacios * t.promedio_turno * margen) / 100) * 100 }))
+    .filter((t) => t.deja >= MINIMO)
+    .sort((a, b) => b.deja - a.deja)
+    .map((t) => ({
+      clave: `turnos:${t.coche}:${t.plantilla}`,
+      tipo: "gana" as const,
+      titulo: `Cubrí el turno ${t.plantilla.toLowerCase()} del ${t.coche}`,
+      monto: `≈ ${$(t.deja)} / mes`,
+      texto: `En ${d.nombre_mes} el ${t.coche} quedó sin chofer ${t.vacios} turnos de ${t.plantilla.toLowerCase()}. Un turno así factura en promedio ${$(t.promedio_turno)}.`,
+      como: `Después de pagar chofer y combustible, esos turnos te habrían dejado unos ${$(t.deja)}. Un chofer suplente para esos turnos se paga solo.`,
+      enlace: "/turnos",
+      accion: "Ver turnos",
+    }));
+}
+
 export function generarSugerencias(d: DatosSugerencias): Sugerencia[] {
   const lista: (Sugerencia | null)[] = [
+    ...turnosVacios(d),
     fiados(d.deuda, d.nombre_mes),
     ...coches(d.coches),
     vencidos(d.vencidos),

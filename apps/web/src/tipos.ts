@@ -263,6 +263,7 @@ export interface CuentaDelTurno {
 
 export interface Ganancia {
   periodo: string;
+  turnos: { usa: boolean; promedio: { plantilla: string; turnos: number; promedio: Centesimos }[]; sin_chofer: number };
   en_curso: boolean;
   completo: boolean;
   dias_sin_cargar: string[];
@@ -310,4 +311,40 @@ export interface Panel {
   mes_anterior: { periodo: string; te_quedo: Centesimos; facturado: Centesimos; completo: boolean };
   idea: Sugerencia | null;
   sin_rendir: { nombre: string; saldo: Centesimos; desde: string }[];
+}
+
+export interface HorarioTurno {
+  id: number;
+  nombre: string;
+  hora_inicio: string;
+  hora_fin: string;
+  color: string | null;
+  activa: boolean;
+}
+
+export interface SemanaTurnos {
+  lunes: string;
+  dias: string[];
+  coches: { id: number; nombre_movil: string }[];
+  plantillas: HorarioTurno[];
+  choferes: { id: number; nombre: string; tipo: Persona["tipo"] }[];
+  turnos: {
+    id: number;
+    fecha: string;
+    coche_id: number;
+    plantilla_id: number;
+    chofer_id: number | null;
+    chofer: string | null;
+    sustituye_a: string | null;
+  }[];
+  huecos: number;
+  conflictos: { chofer_id: number; chofer: string; fecha: string; motivo: "mismo_dia" | "se_pisan" }[];
+}
+
+export interface TurnoDelDia {
+  id: number;
+  coche_id: number;
+  coche: string;
+  plantilla: string;
+  chofer_id: number | null;
 }

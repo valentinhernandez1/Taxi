@@ -23,12 +23,13 @@ insert into cuenta (tipo, persona_id, nombre) values
   ('a_entregar', 3, 'Tiene Chofer Dos'),
   ('a_entregar', 5, 'Tiene la telefonista');
 
-insert into plantilla_turno (nombre, hora_inicio, hora_fin, color) values
-  ('Día', '06:00', '18:00', '#FFD27A'), ('Noche', '18:00', '06:00', '#3E5C8A');
-
+-- Los horarios "Día" y "Noche" los crea la migración 0009.
 insert into turno (fecha, coche_id, chofer_id, plantilla_id) values
-  ('2026-10-12', 1, 2, 1), ('2026-10-12', 1, 3, 2), ('2026-10-12', 2, 4, 1),
-  ('2026-10-13', 1, 2, 1), ('2026-10-13', 2, 3, 1);
+  ('2026-10-12', 1, 2, (select id from plantilla_turno where nombre = 'Día')),
+  ('2026-10-12', 1, 3, (select id from plantilla_turno where nombre = 'Noche')),
+  ('2026-10-12', 2, 4, (select id from plantilla_turno where nombre = 'Día')),
+  ('2026-10-13', 1, 2, (select id from plantilla_turno where nombre = 'Día')),
+  ('2026-10-13', 2, 3, (select id from plantilla_turno where nombre = 'Día'));
 
 -- Viajes: efectivo, tarjeta y fiado; uno de carga inicial (caso 15).
 insert into viaje (fecha, importe, forma_pago, chofer_id, coche_id, turno_id, cliente_id, recibido_por_id, origen, nota, op_key) values
