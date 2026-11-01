@@ -8,6 +8,7 @@ import { AnotarViaje } from "./pantallas/AnotarViaje";
 import { Choferes, FichaChofer, ReglaForm } from "./pantallas/Choferes";
 import { Empleados, PagoEmpleado } from "./pantallas/Empleados";
 import { FichaCoche } from "./pantallas/FichaCoche";
+import { Exportar, Ganancia, Ideas, Llamadas } from "./pantallas/Ganancia";
 import { GastosDelMes, PagarVencimiento, Vencimientos } from "./pantallas/Gastos";
 import { Categorias, GastoFijoForm, GastosFijos } from "./pantallas/GastosFijos";
 import { CambiarPassword } from "./pantallas/CambiarPassword";
@@ -63,7 +64,10 @@ export function App() {
           <Route path="/mas/choferes" element={<Choferes />} />
           <Route path="/mas/choferes/:id" element={<FichaChofer />} />
           <Route path="/mas/choferes/:id/regla" element={<ReglaForm />} />
-          <Route path="/ganancia" element={<Proximamente titulo="Ganancia" etapa="panel y ganancia" />} />
+          <Route path="/ganancia" element={<Ganancia />} />
+          <Route path="/ganancia/ideas" element={<Ideas />} />
+          <Route path="/mas/llamadas" element={<Llamadas />} />
+          <Route path="/mas/exportar" element={<Exportar />} />
           <Route path="/mas" element={<Mas />} />
           <Route path="/mas/ajustes" element={<Ajustes />} />
           <Route path="/mas/ajustes/:clave" element={<EditarAjuste />} />

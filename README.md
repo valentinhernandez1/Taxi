@@ -161,6 +161,20 @@ Pantallas: **Liquidar turno** (Inicio; ¿qué chofer terminó? → ¿están todo
 
 **Pruebas**: `apps/api/test/liquidacion.test.ts` (casos 10, 11 y 12, nota por diferencia, la empresa le paga, sin regla, jornal, doble envío, anular, reglas con vigencia y confirmación) y `packages/shared/src/liquidacion.test.ts`.
 
+## Etapa 8: panel, ganancia y dónde ganar más
+
+Pantallas: **Ganancia** (pestaña; por defecto el último mes completo): cuánto te quedó, de cada $ 100 facturados, la cuenta del mes, cuánto hay que facturar por día para no perder, cuánto deja cada coche antes y después de la cuota, y la plata que entró de verdad. **Dónde ganar más** (sugerencias con su importe; "Ya lo hice", "Descartar", "Volver a mostrar"). **Llamadas perdidas** y **Exportar a Excel** (en Más). En el inicio: "Cómo va el negocio" (el mes anterior y una idea), quién tiene plata sin entregar hace más de 2 días y lo de hoy.
+
+1. **Los tres números por separado** (regla 1): **facturación** = viajes del mes por su fecha (sin la carga inicial); **cobrado** = viajes en efectivo + tarjetas acreditadas (lo que había; la comisión es gasto) + cobros de fiados, por fecha de cobro; **ganancia** = facturación − gastos devengados (pagados o pendientes) − parte de los choferes. Al lado, el flujo de caja: cobrado − gastos pagados − parte de los choferes − sueldos.
+2. **Parte de los choferes del mes**: a cada viaje liquidado le toca su proporción de la parte de su liquidación (así se reparte también por coche), más los fiados cobrados de la regla B y los sueldos de choferes. Los sueldos de otros empleados van a gastos generales; las cuotas, aparte (regla 11).
+3. **Incompleto** (regla 9, caso 16): si faltan días por cargar (desde el primer viaje anotado) o hay viajes sin liquidar, la pantalla lo dice.
+4. **Punto de equilibrio**: los choferes se llevan una proporción de lo facturado y el resto de los gastos es fijo, entonces mínimo por día = (gastos + cuotas) / (1 − proporción de choferes) / días del mes.
+5. **Sugerencias** (`packages/shared/src/sugerencias.ts`, puras y probadas): fiados de más de 30 días y deuda que crece; coche que gasta 10 puntos más de taller que el otro o que sus meses anteriores; vencidos; categoría que sube 15 % o más contra el promedio de 3 meses; llamadas perdidas repetidas en el mismo día y franja (noche = 20 a 6). No inventan nada: sin datos, no hay sugerencia. "Turnos sin chofer" llega con los turnos (Etapa 9).
+6. **Exportar**: CSV con `;` y coma decimal, con marca UTF-8 para que Excel muestre bien los acentos: viajes, cobros, gastos y movimientos de plata del mes.
+7. **Avisos**: por ahora en el inicio (vencimientos, días sin cargar, plata sin entregar, deudas en rojo). Web Push necesita claves VAPID como secret: queda para cuando Valentín lo pida.
+
+**Pruebas**: `apps/api/test/panel.test.ts` (los tres números con un mes completo, caso 15 y 16, viajes sin liquidar, sugerencias y su estado, llamadas, CSV) y `packages/shared/src/ganancia.test.ts`.
+
 ## Fotos de comprobantes (R2 + Cloudflare Images)
 
 En la ficha del cliente, cada cobro tiene "Agregar foto del comprobante", y al terminar un cobro por transferencia la app ofrece sacarle foto.

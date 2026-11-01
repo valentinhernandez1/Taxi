@@ -15,6 +15,8 @@ export function Mas() {
         <FilaMenu a="/mas/empleados" icono={ICONOS.personas} texto="Empleados y pagos" />
         <FilaMenu a="/mas/personas" icono={ICONOS.personas} texto="Choferes y personal" />
         <FilaMenu a="/mas/coches" icono={ICONOS.auto} texto="Coches" />
+        <FilaMenu a="/mas/llamadas" icono={ICONOS.calendario} texto="Llamadas perdidas" />
+        <FilaMenu a="/mas/exportar" icono={ICONOS.recibo} texto="Exportar a Excel" />
         <FilaMenu a="/mas/gastos-fijos" icono={ICONOS.calendario} texto="Gastos fijos" />
         <FilaMenu a="/mas/categorias" icono={ICONOS.recibo} texto="Tipos de gasto" />
         <FilaMenu a="/mas/ajustes" icono={ICONOS.ajustes} texto="Ajustes" />
