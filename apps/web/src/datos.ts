@@ -52,3 +52,19 @@ export function haceDias(dias: number): string {
   if (dias === 1) return "ayer";
   return `hace ${dias} días`;
 }
+
+const MESES_TITULO = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Setiembre", "Octubre", "Noviembre", "Diciembre"];
+
+/** "2026-10" → "Octubre 2026". */
+export function mesLargo(periodo: string): string {
+  const [a, m] = periodo.split("-").map(Number);
+  return `${MESES_TITULO[(m ?? 1) - 1]} ${a}`;
+}
+
+/** "En 3 días", "Hoy", "Venció hace 2 días". */
+export function cuandoVence(dias: number): string {
+  if (dias === 0) return "Vence hoy";
+  if (dias === 1) return "Vence mañana";
+  if (dias > 1) return `En ${dias} días`;
+  return dias === -1 ? "Venció ayer" : `Venció hace ${-dias} días`;
+}

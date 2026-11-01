@@ -383,6 +383,8 @@ export const categoriaGasto = pgTable(
     id: bigserial("id", { mode: "number" }).primaryKey(),
     nombre: text("nombre").notNull(),
     es_de_coche: boolean("es_de_coche").notNull().default(false),
+    /** Cuota de compra de un coche: va aparte de los gastos de funcionamiento (regla 11). */
+    es_cuota_vehiculo: boolean("es_cuota_vehiculo").notNull().default(false),
     activa: boolean("activa").notNull().default(true),
   },
   (t) => [uniqueIndex("categoria_gasto_nombre").on(sql`lower(${t.nombre})`)],
@@ -402,6 +404,8 @@ export const gastoFijo = pgTable(
     /** Meses (1-12) para frecuencia "meses_especificos". */
     meses: smallint("meses").array(),
     dia_del_mes: smallint("dia_del_mes").notNull(),
+    /** Primer período que genera vencimiento, "AAAA-MM". */
+    primer_periodo: text("primer_periodo").notNull(),
     importe_estimado: boolean("importe_estimado").notNull().default(false),
     cuotas_total: integer("cuotas_total"),
     fecha_fin: dia("fecha_fin"),
@@ -410,7 +414,10 @@ export const gastoFijo = pgTable(
     activo: boolean("activo").notNull().default(true),
     creado_en: creadoEn(),
   },
-  (t) => [check("gasto_fijo_dia", sql`${t.dia_del_mes} between 1 and 31`)],
+  (t) => [
+    check("gasto_fijo_dia", sql`${t.dia_del_mes} between 1 and 31`),
+    check("gasto_fijo_primer_periodo", sql`${t.primer_periodo} ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'`),
+  ],
 );
 
 export const gasto = pgTable(
@@ -456,6 +463,8 @@ export const vencimiento = pgTable(
     importe_estimado: dinero("importe_estimado"),
     importe_real: dinero("importe_real"),
     estado: estadoVencimiento("estado").notNull().default("pendiente"),
+    /** "Avisame mañana": no se muestra como aviso antes de este día. */
+    avisar_desde: dia("avisar_desde"),
     gasto_id: bigint("gasto_id", { mode: "number" }).references(() => gasto.id),
   },
   (t) => [
@@ -652,3 +661,10 @@ export const comprobante = pgTable(
     check("comprobante_bytes", sql`${t.bytes} > 0`),
   ],
 );
+
+/** Días que el dueño marcó "no se trabajó": cuentan como cargados (regla 9). */
+export const diaSinTrabajo = pgTable("dia_sin_trabajo", {
+  fecha: dia("fecha").primaryKey(),
+  nota: text("nota"),
+  creado_en: creadoEn(),
+});

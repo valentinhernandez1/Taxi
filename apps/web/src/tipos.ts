@@ -53,3 +53,148 @@ export interface Coche {
   matricula: string | null;
   activo: boolean;
 }
+
+export interface ViajeDelDia {
+  id: number;
+  importe: Centesimos;
+  forma_pago: "efectivo" | "tarjeta" | "fiado";
+  anulado: boolean;
+  motivo_anulacion: string | null;
+  chofer: string | null;
+  coche: string | null;
+  cliente: string | null;
+}
+
+export interface DiaDeViajes {
+  fecha: string;
+  viajes: ViajeDelDia[];
+  totales: { efectivo: Centesimos; tarjeta: Centesimos; fiado: Centesimos; total: Centesimos };
+  sin_trabajo: boolean;
+}
+
+export interface Cobertura {
+  completo: boolean;
+  diasSinCargar: string[];
+}
+
+export interface PersonaConPlata {
+  persona_id: number;
+  nombre: string;
+  tipo: Persona["tipo"];
+  saldo: Centesimos;
+  desde: string | null;
+}
+
+export interface ResumenPlata {
+  caja: Centesimos;
+  banco: Centesimos;
+  handy: Centesimos;
+  a_entregar: Centesimos;
+  personas: PersonaConPlata[];
+  handy_viajes: number;
+  handy_comision_estimada: Centesimos;
+}
+
+export interface Categoria {
+  id: number;
+  nombre: string;
+  es_de_coche: boolean;
+  es_cuota_vehiculo: boolean;
+  activa: boolean;
+}
+
+export interface ConQuePlata {
+  desde: "caja" | "banco" | "persona";
+  persona_id?: number | null;
+}
+
+export interface GastoDelMes {
+  id: number;
+  fecha: string;
+  importe: Centesimos;
+  descripcion: string | null;
+  estado: "pagado" | "pendiente";
+  fecha_pago: string | null;
+  anulado: boolean;
+  motivo_anulacion: string | null;
+  categoria_id: number;
+  categoria: string;
+  es_cuota: boolean;
+  coche: string | null;
+  pagado_desde: string | null;
+  automatico: boolean;
+  comprobantes: { id: number; miniatura: boolean }[];
+}
+
+export interface GastosDelMes {
+  periodo: string;
+  gastos: GastoDelMes[];
+  totales: { total: Centesimos; pagado: Centesimos; pendiente: Centesimos; funcionamiento: Centesimos; cuotas: Centesimos };
+  por_categoria: { categoria: string; es_cuota: boolean; total: Centesimos }[];
+  cobertura: Cobertura;
+}
+
+export interface Vencimiento {
+  id: number;
+  periodo: string;
+  fecha_vence: string;
+  importe_estimado: Centesimos | null;
+  descripcion: string;
+  es_estimado: boolean;
+  es_cuota: boolean;
+  categoria: string;
+  coche: string | null;
+  dias: number;
+  vencido: boolean;
+  avisar: boolean;
+  pospuesto: boolean;
+}
+
+export type Frecuencia = "mensual" | "bimestral" | "anual" | "meses_especificos";
+
+export interface GastoFijo {
+  id: number;
+  categoria_id: number;
+  coche_id: number | null;
+  descripcion: string;
+  importe: Centesimos | null;
+  importe_estimado: boolean;
+  frecuencia: Frecuencia;
+  meses: number[] | null;
+  dia_del_mes: number;
+  primer_periodo: string;
+  cuotas_total: number | null;
+  fecha_fin: string | null;
+  es_cuota_vehiculo: boolean;
+  activo: boolean;
+  categoria: string;
+  coche: string | null;
+  cuotas_pagadas: number;
+}
+
+export type ConceptoPago = "sueldo" | "jornal" | "adelanto" | "aguinaldo" | "salario_vacacional";
+
+export interface ResumenEmpleados {
+  periodo: string;
+  total_del_mes: Centesimos;
+  por_concepto: Record<ConceptoPago, Centesimos>;
+  personas: { persona_id: number; nombre: string; tipo: Persona["tipo"]; pagado_en_el_mes: Centesimos; aguinaldo_estimado: Centesimos }[];
+  pagos: { id: number; persona_id: number; concepto: ConceptoPago; periodo: string; importe: Centesimos; fecha: string; anulado: boolean; motivo_anulacion: string | null }[];
+  aguinaldo: { desde: string; hasta: string; se_paga: "junio" | "diciembre"; total_estimado: Centesimos };
+}
+
+export interface FichaCoche {
+  coche: Coche;
+  periodo: string;
+  facturado: Centesimos;
+  viajes: number;
+  parte_choferes: Centesimos | null;
+  funcionamiento: { categoria: string; total: Centesimos }[];
+  total_funcionamiento: Centesimos;
+  resultado_antes_de_cuota: Centesimos;
+  cuotas: Centesimos;
+  resultado_despues_de_cuota: Centesimos;
+  cuotas_restantes: number | null;
+  proximos_vencimientos: Vencimiento[];
+  cobertura: Cobertura;
+}

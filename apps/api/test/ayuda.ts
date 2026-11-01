@@ -29,6 +29,11 @@ export async function limpiarBase(): Promise<void> {
     await db.execute(sql`insert into cuenta (tipo, persona_id, nombre) values
       ('caja', null, 'Caja del dueño'), ('banco', null, 'Banco'),
       ('handy', null, 'A acreditar por Handy'), ('externo', null, 'Afuera (clientes y proveedores)')`);
+    // Y las categorías de gasto base de la migración 0006.
+    await db.execute(sql`insert into categoria_gasto (nombre, es_de_coche, es_cuota_vehiculo) values
+      ('Combustible', true, false), ('Taller', true, false), ('Seguro', true, false),
+      ('Cuota del coche', true, true), ('BPS', false, false), ('Comisión Handy', false, false),
+      ('Otro gasto', false, false)`);
   });
 }
 

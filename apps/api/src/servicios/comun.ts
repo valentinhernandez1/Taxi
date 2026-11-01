@@ -32,3 +32,11 @@ export const esquemaOpKey = z.string().trim().min(8).max(100);
 export const esquemaMotivo = z.string().trim().min(3, "Escribí el motivo").max(300);
 
 export const esquemaId = z.coerce.number().int().positive();
+
+/** Igual que `esquemaImporte` pero admite cero (por ejemplo, alguien que no entregó nada). */
+export const esquemaImporteOCero = z
+  .number({ error: "Escribí un importe" })
+  .int("El importe no puede tener más de 2 decimales")
+  .min(0, "El importe no puede ser negativo")
+  .max(MAXIMO_CENTESIMOS, "El importe es demasiado grande")
+  .transform((n): Centesimos => centesimos(n));

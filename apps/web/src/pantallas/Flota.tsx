@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 /** Choferes y personal; coches. Listas simples para elegir en los asistentes. */
 import { useState, type FormEvent } from "react";
 import { api, mensajeDeError } from "../api";
@@ -113,10 +114,10 @@ export function Coches() {
         <Tarjeta>
           {datos.coches.map((c) => (
             <div key={c.id} className="flex min-h-16 items-center gap-3 border-b border-separador px-4 last:border-b-0">
-              <span className="flex flex-1 flex-col">
-                <span className="font-bold">{c.nombre_movil}</span>
-                {c.matricula && <span className="text-base text-suave">{c.matricula}</span>}
-              </span>
+              <Link to={`/mas/coches/${c.id}`} className="flex min-h-16 flex-1 flex-col justify-center">
+                <span className="font-bold text-azul">{c.nombre_movil} ›</span>
+                <span className="text-base text-suave">{c.matricula ? `${c.matricula} · ` : ""}Ver cuánto deja</span>
+              </Link>
               <button type="button" onClick={() => baja(c)} className="min-h-12 px-2 text-base font-bold text-rojo">
                 Dar de baja
               </button>

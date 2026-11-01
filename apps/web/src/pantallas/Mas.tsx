@@ -8,8 +8,14 @@ export function Mas() {
   return (
     <Pantalla titulo="Más">
       <Tarjeta>
+        <FilaMenu a="/mas/viajes" icono={ICONOS.auto} texto="Viajes anotados" />
+        <FilaMenu a="/gastos" icono={ICONOS.recibo} texto="Gastos del mes" />
+        <FilaMenu a="/vencimientos" icono={ICONOS.calendario} texto="Vencimientos" />
+        <FilaMenu a="/mas/empleados" icono={ICONOS.personas} texto="Empleados y pagos" />
         <FilaMenu a="/mas/personas" icono={ICONOS.personas} texto="Choferes y personal" />
         <FilaMenu a="/mas/coches" icono={ICONOS.auto} texto="Coches" />
+        <FilaMenu a="/mas/gastos-fijos" icono={ICONOS.calendario} texto="Gastos fijos" />
+        <FilaMenu a="/mas/categorias" icono={ICONOS.recibo} texto="Tipos de gasto" />
         <FilaMenu a="/mas/ajustes" icono={ICONOS.ajustes} texto="Ajustes" />
         <FilaMenu a="/mas/contrasena" icono={ICONOS.llave} texto="Cambiar contraseña" />
         <FilaMenu
