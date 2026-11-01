@@ -4,7 +4,8 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "../env";
 import { requiereSesion, soloDueno } from "../middleware";
-import { esquemaDia, hoy } from "../servicios/comun";
+import { listarCambios } from "../servicios/auditoria";
+import { esquemaDia, esquemaId, hoy } from "../servicios/comun";
 import { exportar, QUE_SE_EXPORTA } from "../servicios/exportar";
 import { anotarLlamada, gananciaDelMes, listarLlamadas, marcarSugerencia, panel, sugerenciasDelMes } from "../servicios/panel";
 
@@ -24,6 +25,14 @@ rutasPanel.post("/sugerencias/estado", async (c) => {
     .object({ clave: z.string().trim().min(1).max(60), periodo: esquemaPeriodo, estado: z.enum(["hecha", "descartada"]).nullable() })
     .parse(await c.req.json());
   return c.json(await marcarSugerencia(c.var.db, datos.clave, datos.periodo, datos.estado));
+});
+
+/** Historial de cambios (anulaciones y correcciones; con ?todo=1, todo). */
+rutasPanel.get("/cambios", async (c) => {
+  const antes = c.req.query("antes");
+  return c.json({
+    cambios: await listarCambios(c.var.db, { antesDe: antes ? esquemaId.parse(antes) : undefined, todo: c.req.query("todo") === "1" }),
+  });
 });
 
 rutasPanel.get("/llamadas", async (c) => c.json({ llamadas: await listarLlamadas(c.var.db) }));

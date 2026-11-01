@@ -146,7 +146,7 @@ export function AnotarViaje() {
       {paso === "dia" && (
         <>
           <Pregunta ayuda="Mirá la fecha en el papel.">¿Qué día fue el viaje?</Pregunta>
-          <ElegirDia elegido={dia} onElegir={(d) => (setDia(d), ir(chofer ? (hayCoches && !coche ? "coche" : "importe") : "chofer"))} />
+          <ElegirDia recientes elegido={dia} onElegir={(d) => (setDia(d), ir(chofer ? (hayCoches && !coche ? "coche" : "importe") : "chofer"))} />
         </>
       )}
 

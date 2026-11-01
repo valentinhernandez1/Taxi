@@ -12,6 +12,7 @@ import { Exportar, Ganancia, Ideas, Llamadas } from "./pantallas/Ganancia";
 import { GastosDelMes, PagarVencimiento, Vencimientos } from "./pantallas/Gastos";
 import { Categorias, GastoFijoForm, GastosFijos } from "./pantallas/GastosFijos";
 import { CambiarPassword } from "./pantallas/CambiarPassword";
+import { Cambios } from "./pantallas/Cambios";
 import { CargaInicial } from "./pantallas/CargaInicial";
 import { Cliente } from "./pantallas/Cliente";
 import { ClienteForm } from "./pantallas/ClienteForm";
@@ -68,6 +69,7 @@ export function App() {
           <Route path="/ganancia" element={<Ganancia />} />
           <Route path="/ganancia/ideas" element={<Ideas />} />
           <Route path="/mas/llamadas" element={<Llamadas />} />
+          <Route path="/mas/cambios" element={<Cambios />} />
           <Route path="/turnos" element={<Turnos />} />
           <Route path="/mas/turnos/horarios" element={<HorariosTurno />} />
           <Route path="/mas/exportar" element={<Exportar />} />

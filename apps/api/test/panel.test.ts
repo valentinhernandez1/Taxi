@@ -165,6 +165,19 @@ describe("Panel del inicio", () => {
   });
 });
 
+describe("Historial de cambios", () => {
+  it("muestra las anulaciones con su motivo; con todo=1, también lo creado", async () => {
+    const r = await crear("/viajes", { op_key: op(), fecha: DIA, importe: $(500), forma_pago: "efectivo" });
+    await crear(`/viajes/${r.viaje_id}/anular`, { motivo: "Se anotó dos veces" });
+    const solo = (await pedir("/panel/cambios", { cookie })).cuerpo.cambios;
+    expect(solo).toEqual([expect.objectContaining({ tabla: "viaje", accion: "anular", motivo: "Se anotó dos veces", usuario: "dueno@ejemplo.uy" })]);
+    const todo = (await pedir("/panel/cambios?todo=1", { cookie })).cuerpo.cambios;
+    expect(todo.map((c: { accion: string }) => c.accion)).toEqual(expect.arrayContaining(["anular", "crear"]));
+    const masViejos = (await pedir(`/panel/cambios?todo=1&antes=${todo[0].id}`, { cookie })).cuerpo.cambios;
+    expect(masViejos.every((c: { id: number }) => c.id < todo[0].id)).toBe(true);
+  });
+});
+
 describe("Exportar a Excel", () => {
   it("CSV con ; y coma decimal, con acentos", async () => {
     await mesCompleto();
