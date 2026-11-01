@@ -54,5 +54,6 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 - Etapa 4 (uso real 1) preparada: despliegue automático a un solo Worker (web + API) y guía en `docs/despliegue.md`. Falta que Valentín cree las cuentas (Neon, Cloudflare), cargue los secrets y que el dueño use fiados y cobros.
 - Fotos de comprobantes (pedido de Valentín, adelantado del post-MVP): R2 + Cloudflare Images, solo dentro de lo gratis (aprobado así). Hoy en cobros; la tabla ya admite gastos para la Etapa 6.
 - Etapa 5 (viajes y plata) hecha: anotar viaje, dónde está la plata, entregas con diferencia, Handy con comisión, días sin cargar. Ver la sección en `README.md`.
-- Próximo paso: **Etapa 6 — gastos**. Pantallas nuevas de referencia en `prototipo/pantallas-nuevas/` (gastos, coches, choferes, empleados, ajustes).
+- Etapa 6 (gastos) hecha: gastos pagados/pendientes, con qué plata, gastos fijos y vencimientos, categorías, pagos a empleados con aguinaldo estimado, ficha de coche con cuota aparte. Ver la sección en `README.md`.
+- Próximo paso: **Etapa 7 — liquidación de choferes**. Pantalla de referencia: `prototipo/Liquidacion.dc.html` y `prototipo/pantallas-nuevas/03-choferes-lista.html`.
 - Hay pendientes para confirmar con el dueño (lista al final de la especificación). Mientras tanto, todo eso va configurable.

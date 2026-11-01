@@ -3,7 +3,12 @@ import { BarraInferior } from "./componentes";
 import { Ajustes, EditarAjuste } from "./pantallas/Ajustes";
 import { AnotarCobro } from "./pantallas/AnotarCobro";
 import { AnotarFiado } from "./pantallas/AnotarFiado";
+import { AnotarGasto } from "./pantallas/AnotarGasto";
 import { AnotarViaje } from "./pantallas/AnotarViaje";
+import { Empleados, PagoEmpleado } from "./pantallas/Empleados";
+import { FichaCoche } from "./pantallas/FichaCoche";
+import { GastosDelMes, PagarVencimiento, Vencimientos } from "./pantallas/Gastos";
+import { Categorias, GastoFijoForm, GastosFijos } from "./pantallas/GastosFijos";
 import { CambiarPassword } from "./pantallas/CambiarPassword";
 import { CargaInicial } from "./pantallas/CargaInicial";
 import { Cliente } from "./pantallas/Cliente";
@@ -45,6 +50,14 @@ export function App() {
           <Route path="/clientes/:id/hoja" element={<CargaInicial />} />
           <Route path="/plata" element={<Plata />} />
           <Route path="/mas/viajes" element={<Viajes />} />
+          <Route path="/gastos" element={<GastosDelMes />} />
+          <Route path="/vencimientos" element={<Vencimientos />} />
+          <Route path="/mas/gastos-fijos" element={<GastosFijos />} />
+          <Route path="/mas/gastos-fijos/nuevo" element={<GastoFijoForm />} />
+          <Route path="/mas/gastos-fijos/:id" element={<GastoFijoForm />} />
+          <Route path="/mas/categorias" element={<Categorias />} />
+          <Route path="/mas/empleados" element={<Empleados />} />
+          <Route path="/mas/coches/:id" element={<FichaCoche />} />
           <Route path="/ganancia" element={<Proximamente titulo="Ganancia" etapa="panel y ganancia" />} />
           <Route path="/mas" element={<Mas />} />
           <Route path="/mas/ajustes" element={<Ajustes />} />
@@ -58,6 +71,9 @@ export function App() {
         <Route path="/cobro" element={<AnotarCobro />} />
         <Route path="/fiado" element={<AnotarFiado />} />
         <Route path="/viaje" element={<AnotarViaje />} />
+        <Route path="/gasto" element={<AnotarGasto />} />
+        <Route path="/vencimientos/:id/pagar" element={<PagarVencimiento />} />
+        <Route path="/pago-empleado" element={<PagoEmpleado />} />
         <Route path="/plata/recibir/:id" element={<RecibirPlata />} />
         <Route path="/plata/handy" element={<AcreditarHandy />} />
       </Routes>

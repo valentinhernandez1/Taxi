@@ -94,3 +94,107 @@ export interface ResumenPlata {
   handy_viajes: number;
   handy_comision_estimada: Centesimos;
 }
+
+export interface Categoria {
+  id: number;
+  nombre: string;
+  es_de_coche: boolean;
+  es_cuota_vehiculo: boolean;
+  activa: boolean;
+}
+
+export interface ConQuePlata {
+  desde: "caja" | "banco" | "persona";
+  persona_id?: number | null;
+}
+
+export interface GastoDelMes {
+  id: number;
+  fecha: string;
+  importe: Centesimos;
+  descripcion: string | null;
+  estado: "pagado" | "pendiente";
+  fecha_pago: string | null;
+  anulado: boolean;
+  motivo_anulacion: string | null;
+  categoria_id: number;
+  categoria: string;
+  es_cuota: boolean;
+  coche: string | null;
+  pagado_desde: string | null;
+  automatico: boolean;
+  comprobantes: { id: number; miniatura: boolean }[];
+}
+
+export interface GastosDelMes {
+  periodo: string;
+  gastos: GastoDelMes[];
+  totales: { total: Centesimos; pagado: Centesimos; pendiente: Centesimos; funcionamiento: Centesimos; cuotas: Centesimos };
+  por_categoria: { categoria: string; es_cuota: boolean; total: Centesimos }[];
+  cobertura: Cobertura;
+}
+
+export interface Vencimiento {
+  id: number;
+  periodo: string;
+  fecha_vence: string;
+  importe_estimado: Centesimos | null;
+  descripcion: string;
+  es_estimado: boolean;
+  es_cuota: boolean;
+  categoria: string;
+  coche: string | null;
+  dias: number;
+  vencido: boolean;
+  avisar: boolean;
+  pospuesto: boolean;
+}
+
+export type Frecuencia = "mensual" | "bimestral" | "anual" | "meses_especificos";
+
+export interface GastoFijo {
+  id: number;
+  categoria_id: number;
+  coche_id: number | null;
+  descripcion: string;
+  importe: Centesimos | null;
+  importe_estimado: boolean;
+  frecuencia: Frecuencia;
+  meses: number[] | null;
+  dia_del_mes: number;
+  primer_periodo: string;
+  cuotas_total: number | null;
+  fecha_fin: string | null;
+  es_cuota_vehiculo: boolean;
+  activo: boolean;
+  categoria: string;
+  coche: string | null;
+  cuotas_pagadas: number;
+}
+
+export type ConceptoPago = "sueldo" | "jornal" | "adelanto" | "aguinaldo" | "salario_vacacional";
+
+export interface ResumenEmpleados {
+  periodo: string;
+  total_del_mes: Centesimos;
+  por_concepto: Record<ConceptoPago, Centesimos>;
+  personas: { persona_id: number; nombre: string; tipo: Persona["tipo"]; pagado_en_el_mes: Centesimos; aguinaldo_estimado: Centesimos }[];
+  pagos: { id: number; persona_id: number; concepto: ConceptoPago; periodo: string; importe: Centesimos; fecha: string; anulado: boolean; motivo_anulacion: string | null }[];
+  aguinaldo: { desde: string; hasta: string; se_paga: "junio" | "diciembre"; total_estimado: Centesimos };
+}
+
+export interface FichaCoche {
+  coche: Coche;
+  periodo: string;
+  facturado: Centesimos;
+  viajes: number;
+  parte_choferes: Centesimos | null;
+  funcionamiento: { categoria: string; total: Centesimos }[];
+  total_funcionamiento: Centesimos;
+  resultado_antes_de_cuota: Centesimos;
+  cuotas: Centesimos;
+  resultado_despues_de_cuota: Centesimos;
+  cuotas_restantes: number | null;
+  proximos_vencimientos: Vencimiento[];
+  cobertura: Cobertura;
+}

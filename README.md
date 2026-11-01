@@ -131,6 +131,21 @@ Pantallas: **Anotar viaje** (día → chofer → coche → importe → ¿cómo p
 
 **Pruebas**: `apps/api/test/plata.test.ts` (casos 1, 8, 9 y 16, anulaciones, doble envío) y `packages/shared/src/plata.test.ts`.
 
+## Etapa 6: gastos
+
+Pantallas: **Anotar gasto** (¿qué gasto? → ¿de qué coche? → ¿qué día? → ¿cuánto? → ¿ya está pagado? → ¿con qué plata? → resumen; después se le puede sacar foto al ticket), **Gastos del mes** (pagado / pendiente, cuotas aparte, aviso de mes incompleto, "Ya lo pagué", anular), **Vencimientos** (lo que vence en 30 días, lo vencido arriba en rojo, "Ya lo pagué", "Avisame mañana", "Este mes no corresponde"), **Gastos fijos** y **Tipos de gasto** (en Más), **Empleados y pagos** (pagos por concepto y aguinaldo estimado) con su asistente, y **Ficha de cada coche** (Más → Coches → tocar el coche). En el inicio: botón "Anotar gasto" y aviso de lo que hay para pagar.
+
+1. **Pendiente vs. pagado** (caso 13): un gasto pendiente cuenta en el mes (devengado) pero no mueve plata; al pagarlo sale del lugar elegido como `movimiento`.
+2. **¿Con qué plata?**: caja, banco o la plata que tiene una persona (por ejemplo, la recaudación de un chofer: baja lo que te tiene que entregar).
+3. **Cuotas de coches aparte** (regla 11, caso 19): la categoría "Cuota del coche" está marcada `es_cuota_vehiculo`; los totales y la ficha del coche la muestran debajo, en "después de cuota". Una cuota tiene que tener coche.
+4. **Vencimientos**: se generan solos (idempotente) desde cada gasto fijo según frecuencia (mensual, cada dos meses, anual o meses elegidos), día del mes (31 → último día en meses cortos), fecha de fin y cantidad de cuotas (`packages/shared/src/gastos.ts`). Avisan 3 días antes y el mismo día (configurable por gasto fijo). "Ya lo pagué" crea el gasto **del período que vence** con el importe real. Anular ese gasto deja el vencimiento otra vez pendiente.
+5. **Aguinaldo estimado**: la doceava parte de sueldos, jornales y adelantos del semestre (dic–may se paga en junio; jun–nov en diciembre). Siempre dice "estimado"; lo confirma el contador.
+6. **Ficha de coche**: facturado del coche − gastos de funcionamiento = resultado antes de cuota; abajo, la cuota y el resultado después de cuota. La parte de los choferes se descuenta cuando estén las liquidaciones (Etapa 7); hasta entonces la ficha lo aclara en vez de inventar un número.
+7. **La comisión de Handy** no se elige a mano ni se anula: sale sola de la acreditación (caso 9).
+8. Migración 0007: `gasto_fijo.primer_periodo` (las filas que existan toman el mes en que se crearon) y `vencimiento.avisar_desde` ("Avisame mañana"). No borra nada.
+
+**Pruebas**: `apps/api/test/gastos.test.ts` (casos 13 y 19, con qué plata, anulaciones, doble envío, categorías, vencimientos, empleados, ficha de coche) y `packages/shared/src/gastos.test.ts`.
+
 ## Fotos de comprobantes (R2 + Cloudflare Images)
 
 En la ficha del cliente, cada cobro tiene "Agregar foto del comprobante", y al terminar un cobro por transferencia la app ofrece sacarle foto.

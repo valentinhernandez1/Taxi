@@ -57,9 +57,9 @@ insert into entrega (persona_id, fecha, esperado, entregado, diferencia, nota, o
 
 -- Las categorías de gasto las crea la migración 0006.
 
-insert into gasto_fijo (categoria_id, coche_id, descripcion, importe, frecuencia, dia_del_mes, cuotas_total, es_cuota_vehiculo) values
-  ((select id from categoria_gasto where nombre = 'Cuota del coche'), 2, 'Cuota Móvil 2', 9800.00, 'mensual', 10, 36, true),
-  ((select id from categoria_gasto where nombre = 'BPS'), null, 'Aporte BPS (monto estimado)', 4500.00, 'mensual', 15, null, false);
+insert into gasto_fijo (categoria_id, coche_id, descripcion, importe, frecuencia, dia_del_mes, primer_periodo, importe_estimado, cuotas_total, es_cuota_vehiculo) values
+  ((select id from categoria_gasto where nombre = 'Cuota del coche'), 2, 'Cuota Móvil 2', 9800.00, 'mensual', 10, '2026-10', false, 36, true),
+  ((select id from categoria_gasto where nombre = 'BPS'), null, 'Aporte BPS (monto estimado)', 4500.00, 'mensual', 15, '2026-10', true, null, false);
 
 insert into gasto (fecha, importe, categoria_id, coche_id, descripcion, estado, fecha_pago, pagado_desde, op_key) values
   ('2026-10-12', 500.00, (select id from categoria_gasto where nombre = 'Combustible'), 1, 'Nafta', 'pagado', '2026-10-12', 1, 'ej-g1'),

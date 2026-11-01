@@ -3,7 +3,19 @@ import { api, mensajeDeError } from "./api";
 import { Aviso, Boton } from "./componentes";
 
 /** "Anular…" con motivo obligatorio: nada confirmado se borra (regla 6). */
-export function AnularConMotivo({ ruta, alAnular }: { ruta: string; alAnular: () => void }) {
+export function AnularConMotivo({
+  ruta,
+  alAnular,
+  texto = "Anular…",
+  pregunta = "¿Por qué lo anulás?",
+  confirmar = "Anular",
+}: {
+  ruta: string;
+  alAnular: () => void;
+  texto?: string;
+  pregunta?: string;
+  confirmar?: string;
+}) {
   const [anulando, setAnulando] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,14 +38,14 @@ export function AnularConMotivo({ ruta, alAnular }: { ruta: string; alAnular: ()
   if (!anulando) {
     return (
       <button type="button" onClick={() => setAnulando(true)} className="min-h-12 self-start text-base font-bold text-azul">
-        Anular…
+        {texto}
       </button>
     );
   }
   return (
     <div className="flex flex-col gap-2 pt-1">
       <label className="flex flex-col gap-1 font-bold">
-        ¿Por qué lo anulás?
+        {pregunta}
         <input
           value={motivo}
           onChange={(e) => setMotivo(e.target.value)}
@@ -45,7 +57,7 @@ export function AnularConMotivo({ ruta, alAnular }: { ruta: string; alAnular: ()
       {error && <Aviso tipo="error">{error}</Aviso>}
       <div className="flex gap-2">
         <Boton variante="peligro" disabled={guardando || motivo.trim().length < 3} onClick={anular} className="min-h-14 text-lg">
-          Anular
+          {confirmar}
         </Boton>
         <Boton variante="secundario" onClick={() => setAnulando(false)} className="min-h-14 text-lg">
           No

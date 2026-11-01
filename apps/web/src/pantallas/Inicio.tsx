@@ -2,8 +2,8 @@ import { diaEnUruguay, formatearDiaLargo, sumarDias } from "@taxis/shared";
 import { Link } from "react-router";
 import { useAjustes } from "../ajustes";
 import { Aviso, ICONOS, Icono, Tarjeta } from "../componentes";
-import { pesos, useCargar } from "../datos";
-import type { Cobertura, ResumenCliente, ResumenPlata } from "../tipos";
+import { cuandoVence, pesos, useCargar } from "../datos";
+import type { Cobertura, ResumenCliente, ResumenPlata, Vencimiento } from "../tipos";
 
 function BotonInicio({ a, icono, texto, principal }: { a: string; icono: string; texto: string; principal?: boolean }) {
   return (
@@ -27,6 +27,8 @@ export function Inicio() {
   const { datos: dias } = useCargar<Cobertura>(`/viajes/dias?desde=${sumarDias(hoy, -7)}&hasta=${sumarDias(hoy, -1)}&desde_el_primero=1`);
   const { datos: plata } = useCargar<ResumenPlata>("/plata");
   const faltan = dias?.diasSinCargar ?? [];
+  const { datos: venc } = useCargar<{ vencimientos: Vencimiento[] }>("/vencimientos");
+  const avisos = venc?.vencimientos.filter((v) => v.avisar) ?? [];
   const enRojo = deben?.clientes.filter((c) => c.nivel === "roja").length ?? 0;
 
   return (
@@ -41,6 +43,7 @@ export function Inicio() {
         <BotonInicio a="/viaje" icono={ICONOS.auto} texto="Anotar viaje" principal />
         <BotonInicio a="/cobro" icono={ICONOS.plata} texto="Anotar cobro" principal />
         <BotonInicio a="/fiado" icono={ICONOS.auto} texto="Anotar fiado" />
+        <BotonInicio a="/gasto" icono={ICONOS.recibo} texto="Anotar gasto" />
       </div>
 
       {deben && (
@@ -58,6 +61,17 @@ export function Inicio() {
             </span>
           </Link>
         </Tarjeta>
+      )}
+
+      {avisos.length > 0 && (
+        <Link to="/vencimientos">
+          <Aviso tipo={avisos.some((v) => v.vencido) ? "error" : "atencion"}>
+            {avisos.length === 1
+              ? `${avisos[0]!.descripcion}: ${cuandoVence(avisos[0]!.dias).toLowerCase()}.`
+              : `${avisos.length} cosas para pagar${avisos.some((v) => v.vencido) ? ", alguna ya vencida" : ""}.`}{" "}
+            Tocá para verlas.
+          </Aviso>
+        </Link>
       )}
 
       {faltan.length > 0 && (

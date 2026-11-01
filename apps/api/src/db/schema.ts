@@ -404,6 +404,8 @@ export const gastoFijo = pgTable(
     /** Meses (1-12) para frecuencia "meses_especificos". */
     meses: smallint("meses").array(),
     dia_del_mes: smallint("dia_del_mes").notNull(),
+    /** Primer período que genera vencimiento, "AAAA-MM". */
+    primer_periodo: text("primer_periodo").notNull(),
     importe_estimado: boolean("importe_estimado").notNull().default(false),
     cuotas_total: integer("cuotas_total"),
     fecha_fin: dia("fecha_fin"),
@@ -412,7 +414,10 @@ export const gastoFijo = pgTable(
     activo: boolean("activo").notNull().default(true),
     creado_en: creadoEn(),
   },
-  (t) => [check("gasto_fijo_dia", sql`${t.dia_del_mes} between 1 and 31`)],
+  (t) => [
+    check("gasto_fijo_dia", sql`${t.dia_del_mes} between 1 and 31`),
+    check("gasto_fijo_primer_periodo", sql`${t.primer_periodo} ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'`),
+  ],
 );
 
 export const gasto = pgTable(
@@ -458,6 +463,8 @@ export const vencimiento = pgTable(
     importe_estimado: dinero("importe_estimado"),
     importe_real: dinero("importe_real"),
     estado: estadoVencimiento("estado").notNull().default("pendiente"),
+    /** "Avisame mañana": no se muestra como aviso antes de este día. */
+    avisar_desde: dia("avisar_desde"),
     gasto_id: bigint("gasto_id", { mode: "number" }).references(() => gasto.id),
   },
   (t) => [

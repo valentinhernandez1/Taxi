@@ -81,6 +81,8 @@ export const ICONOS = {
   salir: "M10 17l-5-5 5-5M5 12h12M14 4h5v16h-5",
   flecha: "M9 6l6 6-6 6",
   auto: "M4 16h16v-4l-2-5H6l-2 5zM8 17a2 2 0 1 0 0 .01M16 17a2 2 0 1 0 0 .01",
+  recibo: "M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3",
+  calendario: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
   personas: "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 1 0 0-6M22 21c0-3-2-5-5-5",
 } as const;
 
