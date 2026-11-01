@@ -57,5 +57,6 @@ Leé este archivo entero antes de tocar código. La especificación completa est
 - Etapa 6 (gastos) hecha: gastos pagados/pendientes, con qué plata, gastos fijos y vencimientos, categorías, pagos a empleados con aguinaldo estimado, ficha de coche con cuota aparte. Ver la sección en `README.md`.
 - Etapa 7 (liquidación) hecha: reglas por chofer con vigencia y "sin confirmar", asistente al terminar el turno, casos 10/11/12, anular. Ver la sección en `README.md`.
 - Etapa 8 (panel, ganancia, dónde ganar más, llamadas perdidas, exportar a CSV) hecha. Ver la sección en `README.md`. Web Push queda pendiente (necesita claves VAPID).
-- Próximo paso: **Etapa 9 — turnos básicos**. Referencia: `prototipo/Turnos.dc.html`.
+- Etapa 9 (turnos básicos) hecha: grilla semanal, cambio rápido, repetir semana, huecos y superposiciones, coche del viaje desde el turno. Ver la sección en `README.md`.
+- Próximo paso: **Etapa 10 — uso real 2** (el dueño usa todo con datos reales). Pendientes: Web Push (claves VAPID), marcar fiados incobrables, y lo que falta confirmar con el dueño (lista al final de la especificación).
 - Hay pendientes para confirmar con el dueño (lista al final de la especificación). Mientras tanto, todo eso va configurable.

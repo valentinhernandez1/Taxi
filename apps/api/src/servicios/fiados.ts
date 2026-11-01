@@ -18,6 +18,7 @@ export interface NuevoFiado {
   importe: Centesimos;
   chofer_id?: number | null;
   coche_id?: number | null;
+  turno_id?: number | null;
   /** El dueño ya vio el aviso de límite y quiere anotarlo igual. */
   confirmar_limite?: boolean;
 }
@@ -102,6 +103,7 @@ export async function anotarFiado(db: Db, usuarioId: number, datos: NuevoFiado) 
           cliente_id: datos.cliente_id,
           chofer_id: datos.chofer_id ?? null,
           coche_id: datos.coche_id ?? null,
+          turno_id: datos.turno_id ?? null,
           op_key: datos.op_key,
         })
         .returning({ id: viaje.id });

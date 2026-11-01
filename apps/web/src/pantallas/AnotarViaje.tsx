@@ -5,7 +5,7 @@ import { api, ErrorApi, mensajeDeError } from "../api";
 import { ElegirDia, leerImporte, MarcoAsistente, Opcion, Pregunta, TecladoImporte } from "../asistente";
 import { Aviso, Boton, Tarjeta } from "../componentes";
 import { nuevaOpKey, pesos, useCargar } from "../datos";
-import type { Coche, Persona, ResumenCliente } from "../tipos";
+import type { Coche, Persona, ResumenCliente, TurnoDelDia } from "../tipos";
 import { ElegirCliente } from "./AnotarCobro";
 
 type Paso = "dia" | "chofer" | "coche" | "importe" | "pago" | "cliente" | "resumen" | "listo";
@@ -37,6 +37,14 @@ export function AnotarViaje() {
 
   const { datos: personas } = useCargar<{ personas: Persona[] }>("/personas");
   const { datos: coches } = useCargar<{ coches: Coche[] }>("/coches");
+  // El coche se completa según el turno asignado; si no hay turno, se pregunta.
+  const { datos: turnosDelDia } = useCargar<{ turnos: TurnoDelDia[] }>(dia ? `/turnos/dia?fecha=${dia}` : null);
+  const turnoDe = (id: number) => {
+    const suyos = turnosDelDia?.turnos.filter((t) => t.chofer_id === id) ?? [];
+    return suyos.length === 1 ? suyos[0]! : null;
+  };
+  const turnoElegido = typeof chofer === "number" ? turnoDe(chofer) : null;
+  const cocheDelTurno = turnoElegido != null && coche === turnoElegido.coche_id;
   const choferes = personas?.personas.filter((p) => p.tipo === "chofer" || p.tipo === "dueno") ?? [];
   const hayCoches = (coches?.coches.length ?? 0) > 0;
   const { importe, error: errorImporte } = leerImporte(texto);
@@ -44,7 +52,7 @@ export function AnotarViaje() {
   const orden: Paso[] = [
     "dia",
     "chofer",
-    ...(hayCoches ? (["coche"] as Paso[]) : []),
+    ...(hayCoches && !cocheDelTurno ? (["coche"] as Paso[]) : []),
     "importe",
     "pago",
     ...(forma === "fiado" ? (["cliente"] as Paso[]) : []),
@@ -146,7 +154,19 @@ export function AnotarViaje() {
         <>
           <Pregunta ayuda="Se mantiene para los próximos viajes que anotes.">¿Qué chofer lo hizo?</Pregunta>
           {choferes.map((c) => (
-            <Opcion key={c.id} elegida={chofer === c.id} onClick={() => (setChofer(c.id), ir(despuesDelChofer))}>
+            <Opcion
+              key={c.id}
+              elegida={chofer === c.id}
+              detalle={turnoDe(c.id) ? `${turnoDe(c.id)!.coche}, turno ${turnoDe(c.id)!.plantilla.toLowerCase()}` : undefined}
+              onClick={() => {
+                setChofer(c.id);
+                const t = turnoDe(c.id);
+                if (t) {
+                  setCoche(t.coche_id);
+                  ir("importe");
+                } else ir(despuesDelChofer);
+              }}
+            >
               {c.nombre}
             </Opcion>
           ))}
@@ -225,7 +245,7 @@ export function AnotarViaje() {
           <Tarjeta className="flex flex-col gap-2 p-4 text-xl">
             <Fila etiqueta="Día" valor={formatearDiaLargo(dia)} />
             <Fila etiqueta="Chofer" valor={nombreChofer ?? "Sin chofer"} />
-            {hayCoches && <Fila etiqueta="Coche" valor={nombreCoche ?? "Sin coche"} />}
+            {hayCoches && <Fila etiqueta="Coche" valor={`${nombreCoche ?? "Sin coche"}${cocheDelTurno ? " (según el turno)" : ""}`} />}
             <Fila etiqueta="Importe" valor={pesos(importe)} />
             <Fila etiqueta="Pago" valor={forma === "fiado" ? `Fiado a ${cliente?.nombre ?? "—"}` : FORMAS.find((f) => f.forma === forma)!.texto} />
             <p className="m-0 font-bold">{efecto()}</p>

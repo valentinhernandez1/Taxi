@@ -175,6 +175,19 @@ Pantallas: **Ganancia** (pestaña; por defecto el último mes completo): cuánto
 
 **Pruebas**: `apps/api/test/panel.test.ts` (los tres números con un mes completo, caso 15 y 16, viajes sin liquidar, sugerencias y su estado, llamadas, CSV) y `packages/shared/src/ganancia.test.ts`.
 
+## Etapa 9: turnos básicos
+
+Pantallas: **Turnos** (Más; grilla de lunes a domingo, día × coche × turno): tocar un turno abre "¿Quién maneja?" con los choferes o "Dejar sin chofer"; arriba, cuántos turnos quedan sin cubrir y qué chofer tiene turnos que se pisan o dos turnos el mismo día; botón "Repetir la semana anterior". **Horarios de los turnos** (agregar, dejar de usar). En **Anotar viaje**, cada chofer muestra su coche y turno del día, y si tiene un solo turno el coche se completa solo. En **Ganancia**, promedio por turno y turnos sin chofer; en **Dónde ganar más**, "Cubrí el turno noche del Móvil 2" con su importe.
+
+1. **Huecos y superposiciones** (`packages/shared/src/turnos.ts`, puro y probado): un turno sin chofer es un hueco; un chofer con dos turnos el mismo día o con turnos que se pisan en horario (también cruzando la medianoche) es un conflicto.
+2. **Cambio rápido**: si se cambia el chofer de un turno de hoy o de antes, queda a quién reemplazó; si se vuelve al original, se borra la marca. Todo cambio queda en la auditoría.
+3. **Repetir la semana anterior** copia solo a los lugares que todavía no tienen nada decidido (no pisa lo que ya se cargó, ni los "sin chofer" puestos a mano).
+4. **El coche del viaje sale del turno** (flujo 1): la API completa `coche_id` y `turno_id` del viaje si el chofer tiene un solo turno ese día; si tiene más de uno o ninguno, se pregunta.
+5. **Turnos sin chofer en Ganancia**: solo si ese mes se usaron los turnos (si no hay ninguno anotado, no dice que estuvieron vacíos). La sugerencia estima vacíos × promedio del turno × lo que queda después de chofer y combustible.
+6. Migración 0009: carga los horarios "Día" (6 a 18) y "Noche" (18 a 6) solo si no hay ninguno.
+
+**Pruebas**: `apps/api/test/turnos.test.ts` (grilla, huecos, conflictos, reemplazo, repetir semana, coche del viaje desde el turno, turnos sin chofer en Ganancia y sugerencias, horarios) y `packages/shared/src/turnos.test.ts`.
+
 ## Fotos de comprobantes (R2 + Cloudflare Images)
 
 En la ficha del cliente, cada cobro tiene "Agregar foto del comprobante", y al terminar un cobro por transferencia la app ofrece sacarle foto.

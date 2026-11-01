@@ -9,6 +9,7 @@ export function Mas() {
     <Pantalla titulo="Más">
       <Tarjeta>
         <FilaMenu a="/mas/viajes" icono={ICONOS.auto} texto="Viajes anotados" />
+        <FilaMenu a="/turnos" icono={ICONOS.calendario} texto="Turnos" />
         <FilaMenu a="/mas/choferes" icono={ICONOS.personas} texto="Choferes y liquidaciones" />
         <FilaMenu a="/gastos" icono={ICONOS.recibo} texto="Gastos del mes" />
         <FilaMenu a="/vencimientos" icono={ICONOS.calendario} texto="Vencimientos" />

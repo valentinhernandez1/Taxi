@@ -49,6 +49,36 @@ async function parteDeChoferes(db: Db, desde: string, hasta: string) {
   return { total: centesimos(total), porCoche: new Map(porCoche.map((f) => [f.coche_id === null ? null : Number(f.coche_id), n(f.parte)])) };
 }
 
+/**
+ * Turnos del mes: promedio facturado por turno (día, noche…) y turnos sin
+ * chofer por coche. Solo si se usan los turnos (si no hay ninguno anotado, no
+ * se inventa que estuvieron vacíos).
+ */
+async function turnosDelMes(db: Db, periodo: string) {
+  const { desde, hasta } = rangoDelPeriodo(periodo);
+  const tope = hasta < hoy() ? hasta : hoy();
+  const [uso] = await db.execute<{ n: number }>(sql`select count(*)::int as n from turno where fecha between ${desde} and ${hasta}`);
+  if (!uso?.n || tope < desde) return { usa: false, promedio: [], vacios: [], sin_chofer: 0 };
+  const promedio = await db.execute<{ plantilla: string; turnos: number; total: string }>(sql`
+    select p.nombre as plantilla, count(distinct v.turno_id)::int as turnos, sum(v.importe)::text as total
+    from viaje v join turno t on t.id = v.turno_id join plantilla_turno p on p.id = t.plantilla_id
+    where not v.anulado and v.origen = 'normal' and v.fecha between ${desde} and ${hasta}
+    group by p.nombre, p.hora_inicio order by p.hora_inicio`);
+  const dias = Math.round((Date.parse(tope) - Date.parse(desde)) / 86_400_000) + 1;
+  const vacios = await db.execute<{ coche: string; plantilla: string; cubiertos: number }>(sql`
+    select co.nombre_movil as coche, p.nombre as plantilla,
+      (select count(*)::int from turno t where t.coche_id = co.id and t.plantilla_id = p.id and t.chofer_id is not null
+        and t.fecha between ${desde} and ${tope}) as cubiertos
+    from coche co cross join plantilla_turno p where co.activo and p.activa order by co.nombre_movil, p.hora_inicio`);
+  const lista = vacios.map((v) => ({ coche: v.coche, plantilla: v.plantilla, vacios: dias - v.cubiertos }));
+  return {
+    usa: true,
+    promedio: promedio.map((p) => ({ plantilla: p.plantilla, turnos: p.turnos, promedio: centesimos(Math.round(n(p.total) / Math.max(1, p.turnos))) })),
+    vacios: lista,
+    sin_chofer: lista.reduce((s, v) => s + v.vacios, 0),
+  };
+}
+
 export async function gananciaDelMes(db: Db, periodo: string) {
   const { desde, hasta } = rangoDelPeriodo(periodo);
   const dias = Number(hasta.slice(8, 10));
@@ -116,8 +146,10 @@ export async function gananciaDelMes(db: Db, periodo: string) {
   });
 
   const cobertura = await coberturaDelMes(db, periodo);
+  const turnos = await turnosDelMes(db, periodo);
   return {
     periodo,
+    turnos: { usa: turnos.usa, promedio: turnos.promedio, sin_chofer: turnos.sin_chofer },
     en_curso: periodo === hoy().slice(0, 7),
     completo: cobertura.completo && v!.sin_liquidar === 0,
     dias_sin_cargar: cobertura.diasSinCargar,
@@ -211,7 +243,23 @@ export async function sugerenciasDelMes(db: Db, periodo: string) {
     sql`select fecha::text, to_char(hora, 'HH24:MI') as hora from llamada_perdida where fecha between ${desde} and ${hasta}`,
   );
 
+  // Turnos sin chofer: vacíos × promedio del turno × lo que queda después de chofer y combustible.
+  const turnos = await turnosDelMes(db, periodo);
+  const facturadoTotal = [...facturadoMes.values()].reduce((s, x) => s + x, 0);
+  const [fact] = await db.execute<{ total: string }>(
+    sql`select coalesce(sum(importe), 0)::text as total from viaje where not anulado and origen = 'normal' and fecha between ${desde} and ${hasta}`,
+  );
+  const facturadoMesTotal = n(fact?.total) || facturadoTotal;
+  const combustible = suma(delMes, (x) => x.nombre === "Combustible");
+  const parte = (await parteDeChoferes(db, desde, hasta)).total;
+  const margen = facturadoMesTotal > 0 ? 1 - parte / facturadoMesTotal - combustible / facturadoMesTotal : 0;
+
   const lista = generarSugerencias({
+    turnos_vacios: turnos.vacios.map((v) => ({
+      ...v,
+      promedio_turno: turnos.promedio.find((p) => p.plantilla === v.plantilla)?.promedio ?? centesimos(0),
+    })),
+    margen,
     nombre_mes: nombreMes(periodo),
     deuda: {
       vieja_30: centesimos(viejos.reduce((s, x) => s + n(x.debe), 0)),

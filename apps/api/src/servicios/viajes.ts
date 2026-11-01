@@ -14,6 +14,7 @@ import { ErrorNegocio } from "../errores";
 import { registrarAuditoria } from "./auditoria";
 import { hoy, validarDia } from "./comun";
 import { cuentaAEntregar, cuentaBase, registrarMovimiento, revertirMovimientos } from "./cuentas";
+import { turnoDelViaje } from "./turnos";
 import { anotarFiado, anularFiado, esDuplicado, validarCoche, validarPersona } from "./fiados";
 
 export interface NuevoViaje {
@@ -35,7 +36,10 @@ async function dondeQuedaElEfectivo(tx: DbOTx, choferId: number | null | undefin
   return cuentaAEntregar(tx, choferId);
 }
 
-export async function anotarViaje(db: Db, usuarioId: number, datos: NuevoViaje) {
+export async function anotarViaje(db: Db, usuarioId: number, entrada: NuevoViaje) {
+  // El coche se completa según el turno del chofer ese día (si tiene uno solo).
+  const delTurno = await turnoDelViaje(db, entrada.chofer_id, entrada.fecha, entrada.coche_id);
+  const datos = { ...entrada, coche_id: entrada.coche_id ?? delTurno?.coche_id ?? null, turno_id: delTurno?.turno_id ?? null };
   if (datos.forma_pago === "fiado") {
     if (!datos.cliente_id) throw new ErrorNegocio("Elegí quién quedó debiendo");
     const r = await anotarFiado(db, usuarioId, { ...datos, cliente_id: datos.cliente_id });
@@ -57,6 +61,7 @@ export async function anotarViaje(db: Db, usuarioId: number, datos: NuevoViaje) 
           forma_pago: datos.forma_pago,
           chofer_id: datos.chofer_id ?? null,
           coche_id: datos.coche_id ?? null,
+          turno_id: datos.turno_id,
           recibido_por_id: datos.forma_pago === "efectivo" ? (datos.chofer_id ?? null) : null,
           op_key: datos.op_key,
         })

@@ -149,6 +149,21 @@ export function Ganancia() {
             </>
           )}
 
+          {g.turnos.usa && (
+            <>
+              <h2 className="m-0 text-xl font-bold">Turnos</h2>
+              <Tarjeta>
+                {g.turnos.promedio.map((t) => (
+                  <Renglon key={t.plantilla} texto={`Turno ${t.plantilla.toLowerCase()}, promedio`} importe={t.promedio} />
+                ))}
+                <Link to="/turnos" className="flex min-h-12 items-center justify-between px-4 font-bold">
+                  <span>Turnos sin chofer</span>
+                  <span className={g.turnos.sin_chofer > 0 ? "text-rojo" : "text-verde"}>{g.turnos.sin_chofer}</span>
+                </Link>
+              </Tarjeta>
+            </>
+          )}
+
           <h2 className="m-0 text-xl font-bold">Plata que entró de verdad</h2>
           <Tarjeta>
             <Renglon texto="Viajes en efectivo" importe={g.cobrado.efectivo} />

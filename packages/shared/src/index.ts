@@ -7,3 +7,4 @@ export * from "./gastos";
 export * from "./liquidacion";
 export * from "./ganancia";
 export * from "./sugerencias";
+export * from "./turnos";

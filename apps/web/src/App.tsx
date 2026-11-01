@@ -23,6 +23,7 @@ import { Mas } from "./pantallas/Mas";
 import { AcreditarHandy, Plata, RecibirPlata } from "./pantallas/Plata";
 import { Proximamente } from "./pantallas/Proximamente";
 import { QuienDebe } from "./pantallas/QuienDebe";
+import { HorariosTurno, Turnos } from "./pantallas/Turnos";
 import { Viajes } from "./pantallas/Viajes";
 import { useSesion } from "./sesion";
 
@@ -67,6 +68,8 @@ export function App() {
           <Route path="/ganancia" element={<Ganancia />} />
           <Route path="/ganancia/ideas" element={<Ideas />} />
           <Route path="/mas/llamadas" element={<Llamadas />} />
+          <Route path="/turnos" element={<Turnos />} />
+          <Route path="/mas/turnos/horarios" element={<HorariosTurno />} />
           <Route path="/mas/exportar" element={<Exportar />} />
           <Route path="/mas" element={<Mas />} />
           <Route path="/mas/ajustes" element={<Ajustes />} />
