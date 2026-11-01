@@ -13,6 +13,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, mensajeDeError } from "../api";
 import { useAjustes } from "../ajustes";
+import { AvisosCelular } from "../avisos";
 import { Aviso, Boton, ICONOS, Icono, Pantalla, Tarjeta } from "../componentes";
 
 /** Texto corto y en palabras de todos los días para cada ajuste. */
@@ -75,6 +76,7 @@ export function Ajustes() {
           ))}
         </Tarjeta>
       )}
+      <AvisosCelular />
     </Pantalla>
   );
 }

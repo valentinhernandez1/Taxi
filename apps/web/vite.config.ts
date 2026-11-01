@@ -29,6 +29,8 @@ export default defineConfig({
         // La app es siempre conectada: se guarda solo la cáscara, nunca la API.
         navigateFallbackDenylist: [/^\/api\//],
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Avisos al celular: el manejo del push está en public/push-sw.js.
+        importScripts: ["push-sw.js"],
       },
     }),
   ],

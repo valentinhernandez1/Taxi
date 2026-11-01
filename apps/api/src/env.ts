@@ -9,6 +9,11 @@ export interface Env {
   COMPROBANTES?: R2Bucket;
   /** Cloudflare Images, para normalizar las fotos y sacar miniaturas. */
   IMAGES?: ImagesBinding;
+  /** Avisos al celular (Web Push). Sin estas tres, los avisos quedan apagados. */
+  VAPID_PUBLICA?: string;
+  VAPID_PRIVADA?: string;
+  /** "mailto:..." de contacto que piden los servicios de push. */
+  VAPID_CONTACTO?: string;
 }
 
 export interface UsuarioActual {

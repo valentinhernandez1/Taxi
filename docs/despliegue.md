@@ -117,6 +117,26 @@ El último comando borra la cadena de la sesión de PowerShell, para no usarla s
 4. **Si se equivoca**: en la ficha del cliente, "Anular…" con un motivo. No se borra nada; queda tachado y en el historial.
 5. Anotá todo lo que le resulte confuso o lento: eso define los ajustes antes de seguir con la Etapa 5 (viajes y plata).
 
+## 9. Avisos en el celular (opcional, gratis)
+
+Los avisos (vencimientos, días sin cargar, plata sin entregar, deudas viejas) llegan una vez por día a las 8 de la mañana de Uruguay. Usan Web Push, que es gratis y no necesita ningún servicio extra. Mientras no cargues las claves, quedan apagados y la app anda igual.
+
+1. En tu compu, dentro del proyecto:
+
+   ```bash
+   pnpm --filter @taxis/api vapid:generar
+   ```
+
+   Imprime `VAPID_PUBLICA` y `VAPID_PRIVADA`. La privada no se guarda en ningún archivo: copiala directo al secret y no la pegues en ningún otro lado.
+2. En GitHub → Settings → Secrets and variables → Actions → **New repository secret**, cargá tres:
+   - `VAPID_PUBLICA`: la que imprimió el comando.
+   - `VAPID_PRIVADA`: la que imprimió el comando.
+   - `VAPID_CONTACTO`: `mailto:` y tu email (por ejemplo `mailto:tu-email@ejemplo.com`). Lo piden los servicios de push por si hay un problema.
+3. Volvé a desplegar (Actions → CI → Run workflow, o cualquier merge a main).
+4. En el celular de tu padre: si es iPhone, primero **agregar la app a la pantalla de inicio** (Safari → Compartir → Agregar a inicio) y abrirla desde ese ícono. Después: Más → Ajustes → **Avisos en el celular** → "Activar los avisos" → permitir. Con "Mandar un aviso de prueba" se comprueba que llegan.
+
+Cómo funciona: el Worker tiene un cron (`0 11 * * *` en `wrangler.produccion.jsonc`) que, si hay algo para avisar, manda un push **vacío** a cada celular suscripto. El celular, al recibirlo, pide los avisos a la API con la sesión del dueño y muestra la notificación. Así ningún dato viaja por el servicio de push. Si un celular se da de baja (por ejemplo, borró la app), el servicio responde 404/410 y se desactiva solo.
+
 ## Si algo sale mal
 
 - **Volver a la versión anterior de la app**: Workers & Pages → `taxis` → **Deployments** → la versión anterior → **Rollback**. No toca la base.
