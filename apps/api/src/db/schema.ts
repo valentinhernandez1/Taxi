@@ -623,6 +623,21 @@ export const sugerenciaEstado = pgTable(
   (t) => [uniqueIndex("sugerencia_estado_unica").on(t.clave, t.periodo)],
 );
 
+/** Celulares donde el dueño activó los avisos (Web Push). */
+export const pushSuscripcion = pgTable(
+  "push_suscripcion",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    activa: boolean("activa").notNull().default(true),
+    ultimo_envio: instante("ultimo_envio"),
+    creado_en: creadoEn(),
+  },
+  (t) => [uniqueIndex("push_suscripcion_endpoint").on(t.endpoint)],
+);
+
 export const aviso = pgTable(
   "aviso",
   {

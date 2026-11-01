@@ -78,6 +78,13 @@
       "when": 1793539561686,
       "tag": "0010_incobrables",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793540291401,
+      "tag": "0011_avisos_push",
+      "breakpoints": true
     }
   ]
 }

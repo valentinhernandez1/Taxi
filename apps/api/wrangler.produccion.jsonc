@@ -20,5 +20,8 @@
   // Images: plan gratis, 5.000 transformaciones distintas por mes; pasado eso no cobra, da error.
   "r2_buckets": [{ "binding": "COMPROBANTES", "bucket_name": "taxis-comprobantes" }],
   "images": { "binding": "IMAGES" },
+  // Avisos al celular: una vez por día a las 8 de la mañana de Uruguay (11 UTC). Si no
+  // están las claves VAPID, no hace nada. Plan gratis: hasta 5 cron por cuenta.
+  "triggers": { "crons": ["0 11 * * *"] },
   "observability": { "enabled": true }
 }

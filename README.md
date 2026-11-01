@@ -171,7 +171,7 @@ Pantallas: **Ganancia** (pestaña; por defecto el último mes completo): cuánto
 4. **Punto de equilibrio**: los choferes se llevan una proporción de lo facturado y el resto de los gastos es fijo, entonces mínimo por día = (gastos + cuotas) / (1 − proporción de choferes) / días del mes.
 5. **Sugerencias** (`packages/shared/src/sugerencias.ts`, puras y probadas): fiados de más de 30 días y deuda que crece; coche que gasta 10 puntos más de taller que el otro o que sus meses anteriores; vencidos; categoría que sube 15 % o más contra el promedio de 3 meses; llamadas perdidas repetidas en el mismo día y franja (noche = 20 a 6). No inventan nada: sin datos, no hay sugerencia. "Turnos sin chofer" llega con los turnos (Etapa 9).
 6. **Exportar**: CSV con `;` y coma decimal, con marca UTF-8 para que Excel muestre bien los acentos: viajes, cobros, gastos y movimientos de plata del mes.
-7. **Avisos**: por ahora en el inicio (vencimientos, días sin cargar, plata sin entregar, deudas en rojo). Web Push necesita claves VAPID como secret: queda para cuando Valentín lo pida.
+7. **Avisos**: en el inicio y, si se cargan las claves VAPID, también en el celular una vez por día (Web Push gratis; ver `docs/despliegue.md`, punto 9). Pruebas: `apps/api/test/push.test.ts`.
 
 **Pruebas**: `apps/api/test/panel.test.ts` (los tres números con un mes completo, caso 15 y 16, viajes sin liquidar, sugerencias y su estado, llamadas, CSV) y `packages/shared/src/ganancia.test.ts`.
 
