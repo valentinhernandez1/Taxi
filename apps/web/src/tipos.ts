@@ -221,6 +221,7 @@ export interface ChoferResumen {
   para_entregar: Centesimos;
   viajes_sin_liquidar: number;
   sin_liquidar_desde: string | null;
+  ultimo_turno: string | null;
 }
 
 export interface LiquidacionHecha {
@@ -250,6 +251,7 @@ export interface CuentaDelTurno {
     desde: string | null;
     hasta: string | null;
   };
+  turnos: { id: number; fecha: string; coche: string; turno: string }[];
   fiados_cobrados: number;
   plata_en_mano: Centesimos;
   cuenta: {
