@@ -156,7 +156,7 @@ Pantallas: **Liquidar turno** (Inicio; ¿qué chofer terminó? → ¿están todo
 4. **Reglas con vigencia** (regla 12): cada regla rige desde una fecha; una nueva o cambiada queda **sin confirmar** hasta que el dueño la confirma en la ficha, y las liquidaciones hechas con una regla sin confirmar lo muestran. Una regla que ya se usó no se cambia: se carga otra desde otra fecha.
 5. **Anular una liquidación** (con motivo) revierte su plata, anula el gasto del turno y deja los viajes otra vez sin liquidar. Mientras esté vigente, sus viajes, fiados y su gasto no se pueden anular sueltos.
 6. **Doble envío**: si la misma liquidación llega dos veces a la vez, la segunda espera el bloqueo del chofer y devuelve la primera.
-7. **Pendiente para confirmar con el dueño**: qué pasa con un fiado que no se cobra nunca (empresa o chofer) queda guardado en la regla, pero todavía no hay forma de marcar un fiado como incobrable; y la regla B paga la parte del chofer cuando el cliente termina de pagar ese viaje (no en pagos parciales).
+7. **Pendiente para confirmar con el dueño**: la regla B paga la parte del chofer cuando el cliente termina de pagar ese viaje (no en pagos parciales). Los fiados incobrables se marcan desde la ficha del cliente (ver "Fiados que no se van a cobrar").
 8. Migración 0008: `viaje.liquidacion_id`, `viaje.parte_fiado_liquidacion_id`, `gasto.liquidacion_id`, y en `liquidacion`: `parte_fiados_cobrados`, `nota`, `anulado_en`, `motivo_anulacion`. Solo agrega.
 
 **Pruebas**: `apps/api/test/liquidacion.test.ts` (casos 10, 11 y 12, nota por diferencia, la empresa le paga, sin regla, jornal, doble envío, anular, reglas con vigencia y confirmación) y `packages/shared/src/liquidacion.test.ts`.
@@ -187,6 +187,19 @@ Pantallas: **Turnos** (Más; grilla de lunes a domingo, día × coche × turno):
 6. Migración 0009: carga los horarios "Día" (6 a 18) y "Noche" (18 a 6) solo si no hay ninguno.
 
 **Pruebas**: `apps/api/test/turnos.test.ts` (grilla, huecos, conflictos, reemplazo, repetir semana, coche del viaje desde el turno, turnos sin chofer en Ganancia y sugerencias, horarios) y `packages/shared/src/turnos.test.ts`.
+
+## Fiados que no se van a cobrar
+
+En la ficha del cliente, cada fiado con deuda tiene **"No se va a cobrar…"** (pide el motivo). No se borra nada: el viaje y lo que pagó quedan; lo que faltaba deja de contarse como deuda (la vista `fiado_pendiente` lo resta, migración 0010) y se cuenta como pérdida en la Ganancia del mes en que se marcó. Si al final paga, **"Al final pagó…"** lo deshace con motivo.
+
+Con el chofer, según su regla (especificación §4, Liquidación, punto 4):
+
+1. **A** (se le adelantó su parte) + **se descuenta al chofer**: en su próxima liquidación se le descuenta la parte adelantada de lo que no se cobró.
+2. **A** + **lo absorbe la empresa**: no cambia nada para el chofer.
+3. **B** (cobra cuando el cliente paga) + **lo absorbe la empresa**: se le paga su parte como si el cliente hubiera pagado todo.
+4. **B** + **se descuenta al chofer**: cobra solo la parte de lo que sí se pagó.
+
+Si el descuento o el pago ya entraron en una liquidación, para deshacer el incobrable primero hay que anular esa liquidación. Pruebas: `apps/api/test/incobrables.test.ts` (las cuatro combinaciones, deshacer, ganancia).
 
 ## Fotos de comprobantes (R2 + Cloudflare Images)
 

@@ -22,7 +22,7 @@ import {
 } from "@taxis/shared";
 import { and, desc, eq, inArray, isNull, lte, sql } from "drizzle-orm";
 import type { Db, DbOTx } from "../db/cliente";
-import { cuenta, gasto, liquidacion, persona, reglaLiquidacion, viaje } from "../db/schema";
+import { cuenta, fiadoIncobrable, gasto, liquidacion, persona, reglaLiquidacion, viaje } from "../db/schema";
 import { ErrorNegocio } from "../errores";
 import { registrarAuditoria } from "./auditoria";
 import { hoy, validarDia } from "./comun";
@@ -165,7 +165,8 @@ async function fiadosCobradosPendientes(tx: DbOTx, choferId: number) {
     join fiado_pendiente fp on fp.viaje_id = v.id
     where v.chofer_id = ${choferId} and v.forma_pago = 'fiado' and not v.anulado
       and r.momento_fiado = 'B' and r.porcentaje_puntos is not null
-      and v.parte_fiado_liquidacion_id is null and fp.pendiente = 0`);
+      and v.parte_fiado_liquidacion_id is null and fp.pendiente = 0
+      and not exists (select 1 from fiado_incobrable fi where fi.viaje_id = v.id and not fi.anulado)`);
   return filas.map((f) => ({ id: Number(f.id), parte: parteDe(desdeNumeric(f.importe), f.porcentaje_puntos) }));
 }
 
@@ -178,9 +179,22 @@ async function datosDelTurno(tx: DbOTx, choferId: number, fecha: Dia) {
     cantidades[v.forma_pago] += 1;
   }
   const cobrados = await fiadosCobradosPendientes(tx, choferId);
+  // Fiados incobrables de este chofer todavía sin aplicar, de viajes ya liquidados o de este turno.
+  const enEsteTurno = new Set(viajes.map((v) => v.id));
+  const incobrables = (
+    await tx.execute<{ id: string; viaje_id: string; liquidado: boolean; descuento: string; parte: string }>(sql`
+      select fi.id::text, fi.viaje_id::text, v.liquidacion_id is not null as liquidado,
+        fi.descuento_chofer::text as descuento, fi.parte_a_pagar::text as parte
+      from fiado_incobrable fi join viaje v on v.id = fi.viaje_id
+      where fi.chofer_id = ${choferId} and not fi.anulado and fi.liquidacion_id is null
+        and (fi.descuento_chofer > 0 or fi.parte_a_pagar > 0)`)
+  )
+    .filter((f) => f.liquidado || enEsteTurno.has(Number(f.viaje_id)))
+    .map((f) => ({ id: Number(f.id), descuento: desdeNumeric(f.descuento), parte: desdeNumeric(f.parte) }));
   const cuentaChofer = await cuentaAEntregar(tx, choferId);
   return {
     viajes,
+    incobrables,
     totales,
     cantidades,
     cobrados,
@@ -197,7 +211,8 @@ function calcular(regla: FilaRegla, d: Awaited<ReturnType<typeof datosDelTurno>>
       efectivo: centesimos(d.totales.efectivo),
       tarjeta: centesimos(d.totales.tarjeta),
       fiado: centesimos(d.totales.fiado),
-      fiados_cobrados: centesimos(d.cobrados.reduce((s, c) => s + c.parte, 0)),
+      fiados_cobrados: centesimos(d.cobrados.reduce((s, c) => s + c.parte, 0) + d.incobrables.reduce((s, c) => s + c.parte, 0)),
+      descuentos: centesimos(d.incobrables.reduce((s, c) => s + c.descuento, 0)),
       gastos,
       plata_en_mano: d.plata_en_mano,
     });
@@ -217,6 +232,7 @@ export async function cuentaDelTurno(db: Db, choferId: number, fecha: Dia, gasto
     regla: regla ? reglaParaMostrar(regla) : null,
     viajes: { cantidades: d.cantidades, totales: d.totales, desde: d.desde, hasta: d.hasta },
     fiados_cobrados: d.cobrados.length,
+    incobrables: d.incobrables.length,
     plata_en_mano: d.plata_en_mano,
     cuenta: regla ? calcular(regla, d, gastos) : null,
   };
@@ -287,7 +303,7 @@ export async function liquidar(db: Db, usuarioId: number, datos: NuevaLiquidacio
       const regla = await reglaVigente(tx, datos.chofer_id, datos.fecha);
       if (!regla) throw new ErrorNegocio(`Primero cargá cómo se le paga a ${p.nombre} (Más → Choferes).`);
       const d = await datosDelTurno(tx, datos.chofer_id, datos.fecha);
-      if (d.viajes.length === 0 && d.cobrados.length === 0) throw new ErrorNegocio(`${p.nombre} no tiene viajes sin liquidar.`);
+      if (d.viajes.length === 0 && d.cobrados.length === 0 && d.incobrables.length === 0) throw new ErrorNegocio(`${p.nombre} no tiene viajes sin liquidar.`);
       const gastos = datos.gasto?.importe ?? centesimos(0);
       const c = calcular(regla, d, gastos);
 
@@ -322,6 +338,7 @@ export async function liquidar(db: Db, usuarioId: number, datos: NuevaLiquidacio
           parte_chofer: aNumeric(c.parte_total),
           adelantos_fiado: aNumeric(c.adelanto_fiados),
           parte_fiados_cobrados: aNumeric(c.parte_fiados_cobrados),
+          descuentos: aNumeric(c.descuentos),
           gastos: aNumeric(gastos),
           esperado: aNumeric(c.esperado),
           entregado: aNumeric(entregado),
@@ -370,6 +387,9 @@ export async function liquidar(db: Db, usuarioId: number, datos: NuevaLiquidacio
       if (d.cobrados.length) {
         await tx.update(viaje).set({ parte_fiado_liquidacion_id: id }).where(inArray(viaje.id, d.cobrados.map((v) => v.id)));
       }
+      if (d.incobrables.length) {
+        await tx.update(fiadoIncobrable).set({ liquidacion_id: id }).where(inArray(fiadoIncobrable.id, d.incobrables.map((f) => f.id)));
+      }
       await registrarAuditoria(tx, {
         tabla: "liquidacion",
         registroId: id,
@@ -399,6 +419,7 @@ export async function anularLiquidacion(db: Db, usuarioId: number, id: number, m
     for (const g of gastos) await anularGastoEn(tx, usuarioId, g.id, `Se anuló la liquidación: ${motivo}`, true);
     await tx.update(viaje).set({ liquidacion_id: null }).where(eq(viaje.liquidacion_id, id));
     await tx.update(viaje).set({ parte_fiado_liquidacion_id: null }).where(eq(viaje.parte_fiado_liquidacion_id, id));
+    await tx.update(fiadoIncobrable).set({ liquidacion_id: null }).where(eq(fiadoIncobrable.liquidacion_id, id));
     await tx.update(liquidacion).set({ estado: "anulada", anulado_en: new Date(), motivo_anulacion: motivo }).where(eq(liquidacion.id, id));
     await registrarAuditoria(tx, {
       tabla: "liquidacion",
@@ -428,6 +449,7 @@ export async function liquidacionesDe(db: Db, choferId: number, limite = 30) {
     parte_chofer: desdeNumeric(l.parte_chofer),
     adelantos_fiado: desdeNumeric(l.adelantos_fiado),
     parte_fiados_cobrados: desdeNumeric(l.parte_fiados_cobrados),
+    descuentos: desdeNumeric(l.descuentos),
     gastos: desdeNumeric(l.gastos),
     esperado: desdeNumeric(l.esperado),
     entregado: desdeNumeric(l.entregado),
@@ -448,6 +470,7 @@ export async function pendienteFiadosB(db: Db, choferId: number): Promise<Centes
     join regla_liquidacion r on r.id = l.regla_id
     join fiado_pendiente fp on fp.viaje_id = v.id
     where v.chofer_id = ${choferId} and r.momento_fiado = 'B' and r.porcentaje_puntos is not null
-      and v.parte_fiado_liquidacion_id is null and fp.pendiente > 0`);
+      and v.parte_fiado_liquidacion_id is null and fp.pendiente > 0
+      and not exists (select 1 from fiado_incobrable fi where fi.viaje_id = v.id and not fi.anulado)`);
   return centesimos(filas.reduce((s, f) => s + parteDe(desdeNumeric(f.importe), f.porcentaje_puntos), 0));
 }

@@ -94,6 +94,7 @@ export function Ganancia() {
             <Renglon texto="Parte de los choferes" importe={g.parte_choferes} signo="− " />
             <Renglon texto="Gastos de los coches" importe={g.gastos_coches} signo="− " />
             <Renglon texto="Gastos generales y sueldos" importe={g.gastos_generales} signo="− " />
+            {g.incobrables > 0 && <Renglon texto="Fiados que no se van a cobrar" importe={g.incobrables} signo="− " />}
             <Renglon texto="Ganancia del negocio" importe={g.ganancia_negocio} fuerte />
             <Renglon texto="Cuotas de los coches" importe={g.cuotas} signo="− " />
             <Renglon texto="Te quedó" importe={g.te_quedo} fuerte borde={false} />

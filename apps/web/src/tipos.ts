@@ -27,6 +27,7 @@ export interface ItemHistorial {
   nota?: string | null;
   pagado?: Centesimos;
   pendiente?: Centesimos;
+  incobrable?: { id: number; importe: Centesimos; motivo: string; fecha: string } | null;
   medio?: "efectivo" | "transferencia" | null;
   recibido_por?: string | null;
   aplicado?: { viaje_id: number; fecha: string; importe: Centesimos }[];
@@ -229,6 +230,7 @@ export interface LiquidacionHecha {
   parte_chofer: Centesimos;
   adelantos_fiado: Centesimos;
   parte_fiados_cobrados: Centesimos;
+  descuentos: Centesimos;
   gastos: Centesimos;
   esperado: Centesimos;
   entregado: Centesimos;
@@ -256,6 +258,7 @@ export interface CuentaDelTurno {
     adelanto_fiados: Centesimos;
     pendiente_fiados: Centesimos;
     parte_fiados_cobrados: Centesimos;
+    descuentos: Centesimos;
     parte_total: Centesimos;
     esperado: Centesimos;
   } | null;
@@ -273,6 +276,7 @@ export interface Ganancia {
   gastos_coches: Centesimos;
   gastos_generales: Centesimos;
   cuotas: Centesimos;
+  incobrables: Centesimos;
   dias_del_mes: number;
   ganancia_negocio: Centesimos;
   te_quedo: Centesimos;

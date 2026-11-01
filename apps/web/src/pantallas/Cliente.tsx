@@ -25,6 +25,7 @@ export function Cliente() {
   const vigentes = historial.filter((h) => !h.anulado);
   const totalViajes = vigentes.filter((h) => h.tipo === "fiado").reduce((s, h) => s + h.importe, 0);
   const totalPagos = vigentes.filter((h) => h.tipo === "cobro").reduce((s, h) => s + h.importe, 0);
+  const totalPerdido = vigentes.reduce((s, h) => s + (h.incobrable?.importe ?? 0), 0);
 
   return (
     <Pantalla titulo={cliente.nombre} volver="/deben">
@@ -73,8 +74,9 @@ export function Cliente() {
             <div className="flex flex-col gap-1 px-4 py-3 text-suave">
               <span>
                 Total viajes {pesos(totalViajes)} − pagos {pesos(totalPagos)}
+                {totalPerdido > 0 ? ` − no se cobra ${pesos(totalPerdido)}` : ""}
               </span>
-              <span className="text-xl font-bold text-tinta">= {pesos(totalViajes - totalPagos)}</span>
+              <span className="text-xl font-bold text-tinta">= {pesos(totalViajes - totalPagos - totalPerdido)}</span>
             </div>
           </Tarjeta>
         )}
@@ -167,7 +169,10 @@ function FilaHistorial({ item, alAnular }: { item: ItemHistorial; alAnular: () =
         </span>
       </div>
       {detalle && <span className="text-base text-suave">{detalle}</span>}
-      {item.tipo === "fiado" && !item.anulado && (
+      {item.tipo === "fiado" && !item.anulado && item.incobrable && (
+        <span className="text-base font-bold text-tinta">{item.pagado ? `Pagó ${pesos(item.pagado)}` : "No pagó nada"}</span>
+      )}
+      {item.tipo === "fiado" && !item.anulado && !item.incobrable && (
         <span className={`text-base font-bold ${item.pendiente === 0 ? "text-verde" : "text-tinta"}`}>
           {item.pendiente === 0 ? "Pago" : `Debe ${pesos(item.pendiente ?? 0)}`}
           {item.pagado && item.pendiente !== 0 ? ` (pagó ${pesos(item.pagado)})` : ""}
@@ -179,6 +184,29 @@ function FilaHistorial({ item, alAnular }: { item: ItemHistorial; alAnular: () =
       {item.anulado && <span className="text-base font-bold text-rojo">Anulado: {item.motivo_anulacion}</span>}
       {item.tipo === "cobro" && !item.anulado && item.origen === "normal" && (
         <FotosComprobante tabla="cobro" registroId={item.id} fotos={item.comprobantes ?? []} alCambiar={alAnular} />
+      )}
+      {item.tipo === "fiado" && !item.anulado && item.incobrable && (
+        <>
+          <span className="text-base font-bold text-rojo">
+            No se cobra: {pesos(item.incobrable.importe)} ({item.incobrable.motivo})
+          </span>
+          <AnularConMotivo
+            ruta={`/fiados/incobrables/${item.incobrable.id}/anular`}
+            alAnular={alAnular}
+            texto="Al final pagó…"
+            pregunta="¿Qué pasó?"
+            confirmar="Volver a la deuda"
+          />
+        </>
+      )}
+      {item.tipo === "fiado" && !item.anulado && !item.incobrable && (item.pendiente ?? 0) > 0 && (
+        <AnularConMotivo
+          ruta={`/fiados/${item.id}/incobrable`}
+          alAnular={alAnular}
+          texto="No se va a cobrar…"
+          pregunta="¿Por qué no se va a cobrar?"
+          confirmar="Darlo por perdido"
+        />
       )}
       {!item.anulado && <AnularConMotivo ruta={`/${item.tipo === "fiado" ? "fiados" : "cobros"}/${item.id}/anular`} alAnular={alAnular} />}
     </div>

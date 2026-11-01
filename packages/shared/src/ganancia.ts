@@ -13,6 +13,8 @@ export interface DatosGanancia {
   gastos_generales: Centesimos;
   /** Cuotas de compra de coches: van aparte (regla 11). */
   cuotas: Centesimos;
+  /** Fiados que se marcaron como que no se van a cobrar en el mes: plata perdida. */
+  incobrables?: Centesimos;
   dias_del_mes: number;
 }
 
@@ -29,18 +31,19 @@ export interface CuentaDelMes {
 }
 
 export function cuentaDelMes(d: DatosGanancia): CuentaDelMes {
-  const ganancia_negocio = centesimos(d.facturado - d.parte_choferes - d.gastos_coches - d.gastos_generales);
+  const ganancia_negocio = centesimos(d.facturado - d.parte_choferes - d.gastos_coches - d.gastos_generales - (d.incobrables ?? 0));
   const parte = (x: number) => Math.round((x * 100) / d.facturado);
   let de_cada_100: CuentaDelMes["de_cada_100"] = null;
   if (d.facturado > 0) {
     const choferes = parte(d.parte_choferes);
     const coches = parte(d.gastos_coches);
-    const generales = parte(d.gastos_generales);
+    // Los incobrables cuentan con los generales en el reparto de cada $ 100.
+    const generales = parte(d.gastos_generales + (d.incobrables ?? 0));
     de_cada_100 = { choferes, coches, generales, queda: 100 - choferes - coches - generales };
   }
   // Los choferes se llevan una proporción de lo facturado; el resto de los gastos es fijo en el mes.
   const proporcion = d.facturado > 0 ? d.parte_choferes / d.facturado : 0;
-  const fijos = d.gastos_coches + d.gastos_generales + d.cuotas;
+  const fijos = d.gastos_coches + d.gastos_generales + d.cuotas + (d.incobrables ?? 0);
   const equilibrio_por_dia =
     proporcion >= 1 || d.dias_del_mes <= 0 ? null : centesimos(Math.round(fijos / (1 - proporcion) / d.dias_del_mes));
   return {
