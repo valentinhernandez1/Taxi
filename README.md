@@ -201,6 +201,11 @@ Con el chofer, según su regla (especificación §4, Liquidación, punto 4):
 
 Si el descuento o el pago ya entraron en una liquidación, para deshacer el incobrable primero hay que anular esa liquidación. Pruebas: `apps/api/test/incobrables.test.ts` (las cuatro combinaciones, deshacer, ganancia).
 
+## Retoques según la especificación
+
+1. **Anotar viaje → ¿Qué día?** muestra hoy, ayer y los días de la última semana, marcando los que faltan anotar (flujo 1).
+2. **Más → Historial de cambios**: todo lo anulado o corregido, con cuándo, quién y el motivo (regla 6; con "Todo" se ve también lo anotado). Sale de la tabla `auditoria`, que no admite cambios ni borrados.
+
 ## Fotos de comprobantes (R2 + Cloudflare Images)
 
 En la ficha del cliente, cada cobro tiene "Agregar foto del comprobante", y al terminar un cobro por transferencia la app ofrece sacarle foto.

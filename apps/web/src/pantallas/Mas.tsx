@@ -20,6 +20,7 @@ export function Mas() {
         <FilaMenu a="/mas/exportar" icono={ICONOS.recibo} texto="Exportar a Excel" />
         <FilaMenu a="/mas/gastos-fijos" icono={ICONOS.calendario} texto="Gastos fijos" />
         <FilaMenu a="/mas/categorias" icono={ICONOS.recibo} texto="Tipos de gasto" />
+        <FilaMenu a="/mas/cambios" icono={ICONOS.recibo} texto="Historial de cambios" />
         <FilaMenu a="/mas/ajustes" icono={ICONOS.ajustes} texto="Ajustes" />
         <FilaMenu a="/mas/contrasena" icono={ICONOS.llave} texto="Cambiar contraseña" />
         <FilaMenu

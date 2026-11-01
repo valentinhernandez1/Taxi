@@ -3,7 +3,7 @@ import { diaEnUruguay, formatearDiaLargo, parsearImporte, sumarDias, type Centes
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { Icono } from "./componentes";
-import { pesos } from "./datos";
+import { pesos, useCargar } from "./datos";
 
 export function MarcoAsistente({
   titulo,
@@ -148,19 +148,34 @@ export function hoyUY(): string {
   return diaEnUruguay(new Date());
 }
 
-/** Hoy / Ayer / Otro día (con calendario; no deja elegir el futuro). */
-export function ElegirDia({ elegido, onElegir }: { elegido: string | null; onElegir: (dia: string) => void }) {
+/**
+ * Hoy / Ayer / Otro día (con calendario; no deja elegir el futuro). Con
+ * `recientes`, además los días de la última semana, marcando los que faltan
+ * anotar (flujo 1: "marcando días sin cargar").
+ */
+export function ElegirDia({ elegido, onElegir, recientes = false }: { elegido: string | null; onElegir: (dia: string) => void; recientes?: boolean }) {
   const hoy = hoyUY();
   const ayer = sumarDias(hoy, -1);
   const [otro, setOtro] = useState(elegido && elegido !== hoy && elegido !== ayer ? elegido : "");
+  const { datos: semana } = useCargar<{ diasSinCargar: string[] }>(
+    recientes ? `/viajes/dias?desde=${sumarDias(hoy, -7)}&hasta=${hoy}&desde_el_primero=1` : null,
+  );
+  const falta = new Set(semana?.diasSinCargar ?? []);
+  const nota = (d: string) => (falta.has(d) && d !== hoy ? "Falta anotar" : undefined);
+  const dias = recientes ? [2, 3, 4, 5, 6, 7].map((k) => sumarDias(hoy, -k)) : [];
   return (
     <div className="flex flex-col gap-3">
       <Opcion onClick={() => onElegir(hoy)} elegida={elegido === hoy} detalle={formatearDiaLargo(hoy)}>
         Hoy
       </Opcion>
-      <Opcion onClick={() => onElegir(ayer)} elegida={elegido === ayer} detalle={formatearDiaLargo(ayer)}>
+      <Opcion onClick={() => onElegir(ayer)} elegida={elegido === ayer} detalle={nota(ayer) ? `${formatearDiaLargo(ayer)} · Falta anotar` : formatearDiaLargo(ayer)}>
         Ayer
       </Opcion>
+      {dias.map((d) => (
+        <Opcion key={d} onClick={() => onElegir(d)} elegida={elegido === d} detalle={nota(d)}>
+          {formatearDiaLargo(d)}
+        </Opcion>
+      ))}
       <label className="flex flex-col gap-2 rounded-[14px] border-2 border-borde bg-white p-4">
         <span className="text-xl font-bold">Otro día</span>
         <input
