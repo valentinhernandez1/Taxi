@@ -134,6 +134,32 @@ describe("el coche del viaje sale del turno", () => {
   });
 });
 
+describe("liquidar por turno", () => {
+  it("si los viajes son de un solo turno, la liquidación queda de ese turno; anulada, el turno se libera", async () => {
+    const { m1, juan } = await flota();
+    await crear("/reglas", { chofer_id: juan, tipo: "porcentaje", porcentaje_puntos: 3000, modo_entrega: "se_queda_su_parte", momento_fiado: "A", vigente_desde: "2026-10-01" });
+    await asignar("2026-10-20", m1, NOCHE, juan);
+    await crear("/viajes", { op_key: op(), fecha: "2026-10-20", importe: $(1000), forma_pago: "efectivo", chofer_id: juan });
+    const ch = (await pedir("/choferes", { cookie })).cuerpo.choferes.find((c: { id: number }) => c.id === juan);
+    expect(ch.ultimo_turno).toBe("Noche del Móvil 1|2026-10-20");
+    const cuenta = (await pedir(`/liquidaciones/cuenta?chofer_id=${juan}&fecha=2026-10-21`, { cookie })).cuerpo;
+    expect(cuenta.turnos).toEqual([expect.objectContaining({ fecha: "2026-10-20", coche: "Móvil 1", turno: "Noche" })]);
+
+    const l = await crear("/liquidaciones", { op_key: op(), chofer_id: juan, fecha: "2026-10-21", entregado: $(700) });
+    const [t] = await conBase((db) => db.select().from(turno));
+    let fila = await conBase((db) => db.execute<{ turno_id: string | null }>(sql`select turno_id::text from liquidacion where id = ${l.liquidacion_id}`));
+    expect(fila[0]!.turno_id).toBe(String(t!.id));
+
+    await crear(`/liquidaciones/${l.liquidacion_id}/anular`, { motivo: "Para corregir" });
+    fila = await conBase((db) => db.execute<{ turno_id: string | null }>(sql`select turno_id::text from liquidacion where id = ${l.liquidacion_id}`));
+    expect(fila[0]!.turno_id).toBeNull();
+    // Se vuelve a liquidar el mismo turno sin chocar con la anulada.
+    const otra = await crear("/liquidaciones", { op_key: op(), chofer_id: juan, fecha: "2026-10-21", entregado: $(700) });
+    fila = await conBase((db) => db.execute<{ turno_id: string | null }>(sql`select turno_id::text from liquidacion where id = ${otra.liquidacion_id}`));
+    expect(fila[0]!.turno_id).toBe(String(t!.id));
+  });
+});
+
 describe("turnos sin chofer en Ganancia y Dónde ganar más", () => {
   it("promedio por turno y sugerencia de cubrir los turnos vacíos", async () => {
     const { m1, juan } = await flota();

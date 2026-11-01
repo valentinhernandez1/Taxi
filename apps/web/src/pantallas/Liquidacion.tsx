@@ -18,6 +18,13 @@ function Fila({ texto, valor, fuerte }: { texto: string; valor: string; fuerte?:
   );
 }
 
+/** "Noche del Móvil 1|2026-10-31" → "noche del Móvil 1 (31 de octubre)". */
+function textoTurno(t: string): string {
+  const [descripcion = "", fecha = ""] = t.split("|");
+  const [turno = "", ...coche] = descripcion.split(" del ");
+  return `${turno.toLowerCase()} del ${coche.join(" del ")} (${fechaCorta(fecha)})`;
+}
+
 /** Flujo 4: liquidación al terminar el turno, una pregunta por pantalla. */
 export function Liquidacion() {
   const navegar = useNavigate();
@@ -123,7 +130,11 @@ export function Liquidacion() {
             <Opcion
               key={c.id}
               elegida={choferId === c.id}
-              detalle={`${c.viajes_sin_liquidar} viajes${c.sin_liquidar_desde ? ` desde el ${fechaCorta(c.sin_liquidar_desde)}` : ""}`}
+              detalle={
+                c.ultimo_turno
+                  ? `Terminó el turno ${textoTurno(c.ultimo_turno)} · ${c.viajes_sin_liquidar} viajes`
+                  : `${c.viajes_sin_liquidar} viajes${c.sin_liquidar_desde ? ` desde el ${fechaCorta(c.sin_liquidar_desde)}` : ""}`
+              }
               onClick={() => (setChoferId(c.id), setPaso("viajes"))}
             >
               {c.nombre}
@@ -139,6 +150,11 @@ export function Liquidacion() {
             <p className="text-suave">Cargando…</p>
           ) : (
             <>
+              {turno.turnos.length > 0 && (
+                <p className="m-0 text-suave">
+                  {turno.turnos.map((t) => `Turno ${t.turno.toLowerCase()} del ${t.coche}, ${fechaCorta(t.fecha)}`).join(" · ")}
+                </p>
+              )}
               <Tarjeta className="flex flex-col gap-2 p-4 text-lg">
                 <Fila texto={`${turno.viajes.cantidades.efectivo} en efectivo`} valor={pesos(turno.viajes.totales.efectivo)} />
                 <Fila texto={`${turno.viajes.cantidades.tarjeta} con tarjeta`} valor={pesos(turno.viajes.totales.tarjeta)} />

@@ -141,7 +141,7 @@ export async function confirmarRegla(db: Db, usuarioId: number, id: number) {
 
 async function viajesSinLiquidar(tx: DbOTx, choferId: number, fecha: Dia) {
   return tx
-    .select({ id: viaje.id, fecha: viaje.fecha, importe: viaje.importe, forma_pago: viaje.forma_pago, coche_id: viaje.coche_id })
+    .select({ id: viaje.id, fecha: viaje.fecha, importe: viaje.importe, forma_pago: viaje.forma_pago, coche_id: viaje.coche_id, turno_id: viaje.turno_id })
     .from(viaje)
     .where(
       and(
@@ -192,8 +192,19 @@ async function datosDelTurno(tx: DbOTx, choferId: number, fecha: Dia) {
     .filter((f) => f.liquidado || enEsteTurno.has(Number(f.viaje_id)))
     .map((f) => ({ id: Number(f.id), descuento: desdeNumeric(f.descuento), parte: desdeNumeric(f.parte) }));
   const cuentaChofer = await cuentaAEntregar(tx, choferId);
+  // De qué turnos son los viajes (para mostrar "terminó el turno noche del Móvil 1" y guardar el turno).
+  const idsTurno = [...new Set(viajes.map((v) => v.turno_id).filter((x): x is number => x != null))];
+  const turnos = idsTurno.length
+    ? await tx.execute<{ id: string; fecha: string; coche: string; turno: string }>(sql`
+        select t.id::text, t.fecha::text, co.nombre_movil as coche, p.nombre as turno
+        from turno t join coche co on co.id = t.coche_id join plantilla_turno p on p.id = t.plantilla_id
+        where t.id in ${sql.raw(`(${idsTurno.join(",")})`)} order by t.fecha, p.hora_inicio`)
+    : [];
   return {
     viajes,
+    turnos: turnos.map((t) => ({ id: Number(t.id), fecha: t.fecha, coche: t.coche, turno: t.turno })),
+    /** Si todos los viajes son de un mismo turno, la liquidación es de ese turno. */
+    turno_id: idsTurno.length === 1 && viajes.every((v) => v.turno_id === idsTurno[0]) ? idsTurno[0]! : null,
     incobrables,
     totales,
     cantidades,
@@ -231,6 +242,7 @@ export async function cuentaDelTurno(db: Db, choferId: number, fecha: Dia, gasto
     chofer: { id: p.id, nombre: p.nombre },
     regla: regla ? reglaParaMostrar(regla) : null,
     viajes: { cantidades: d.cantidades, totales: d.totales, desde: d.desde, hasta: d.hasta },
+    turnos: d.turnos,
     fiados_cobrados: d.cobrados.length,
     incobrables: d.incobrables.length,
     plata_en_mano: d.plata_en_mano,
@@ -246,10 +258,14 @@ export async function listarChoferes(db: Db) {
     .from(persona)
     .where(and(eq(persona.tipo, "chofer"), eq(persona.activo, true)))
     .orderBy(persona.nombre);
-  const pendientes = await db.execute<{ chofer_id: string; viajes: number; desde: string }>(sql`
-    select chofer_id::text, count(*)::int as viajes, min(fecha)::text as desde from viaje
-    where liquidacion_id is null and not anulado and origen = 'normal' and chofer_id is not null
-    group by chofer_id`);
+  const pendientes = await db.execute<{ chofer_id: string; viajes: number; desde: string; ultimo_turno: string | null }>(sql`
+    select v.chofer_id::text, count(*)::int as viajes, min(v.fecha)::text as desde,
+      (select p.nombre || ' del ' || co.nombre_movil || '|' || t.fecha::text
+        from turno t join plantilla_turno p on p.id = t.plantilla_id join coche co on co.id = t.coche_id
+        where t.id = max(v.turno_id)) as ultimo_turno
+    from viaje v
+    where v.liquidacion_id is null and not v.anulado and v.origen = 'normal' and v.chofer_id is not null
+    group by v.chofer_id`);
   const saldos = await db.execute<{ persona_id: string; saldo: string }>(
     sql`select persona_id::text, saldo::text from saldo_cuenta where tipo = 'a_entregar'`,
   );
@@ -265,6 +281,8 @@ export async function listarChoferes(db: Db) {
       para_entregar: desdeNumeric(saldos.find((s) => Number(s.persona_id) === c.id)?.saldo ?? "0"),
       viajes_sin_liquidar: p?.viajes ?? 0,
       sin_liquidar_desde: p?.desde ?? null,
+      /** "Noche del Móvil 1|2026-10-31": el último turno con viajes sin liquidar. */
+      ultimo_turno: p?.ultimo_turno ?? null,
     });
   }
   return resultado;
@@ -332,6 +350,7 @@ export async function liquidar(db: Db, usuarioId: number, datos: NuevaLiquidacio
         .insert(liquidacion)
         .values({
           chofer_id: datos.chofer_id,
+          turno_id: d.turno_id,
           regla_id: regla.id,
           fecha: datos.fecha,
           facturado: aNumeric(c.facturado),
@@ -420,12 +439,13 @@ export async function anularLiquidacion(db: Db, usuarioId: number, id: number, m
     await tx.update(viaje).set({ liquidacion_id: null }).where(eq(viaje.liquidacion_id, id));
     await tx.update(viaje).set({ parte_fiado_liquidacion_id: null }).where(eq(viaje.parte_fiado_liquidacion_id, id));
     await tx.update(fiadoIncobrable).set({ liquidacion_id: null }).where(eq(fiadoIncobrable.liquidacion_id, id));
-    await tx.update(liquidacion).set({ estado: "anulada", anulado_en: new Date(), motivo_anulacion: motivo }).where(eq(liquidacion.id, id));
+    // El turno queda libre para liquidarlo de nuevo (cuál era queda en la auditoría).
+    await tx.update(liquidacion).set({ estado: "anulada", anulado_en: new Date(), motivo_anulacion: motivo, turno_id: null }).where(eq(liquidacion.id, id));
     await registrarAuditoria(tx, {
       tabla: "liquidacion",
       registroId: id,
       accion: "anular",
-      antes: { estado: "confirmada", esperado: l.esperado, entregado: l.entregado },
+      antes: { estado: "confirmada", esperado: l.esperado, entregado: l.entregado, turno_id: l.turno_id },
       despues: { estado: "anulada" },
       motivo,
       usuarioId,
