@@ -5,3 +5,5 @@ export * from "./fiados";
 export * from "./plata";
 export * from "./gastos";
 export * from "./liquidacion";
+export * from "./ganancia";
+export * from "./sugerencias";

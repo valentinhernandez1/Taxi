@@ -2,8 +2,8 @@ import { diaEnUruguay, formatearDiaLargo, sumarDias } from "@taxis/shared";
 import { Link } from "react-router";
 import { useAjustes } from "../ajustes";
 import { Aviso, ICONOS, Icono, Tarjeta } from "../componentes";
-import { cuandoVence, pesos, useCargar } from "../datos";
-import type { Cobertura, ResumenCliente, ResumenPlata, Vencimiento } from "../tipos";
+import { cuandoVence, haceDias, mesLargo, pesos, useCargar } from "../datos";
+import type { Cobertura, Panel, ResumenCliente, ResumenPlata, Vencimiento } from "../tipos";
 
 function BotonInicio({ a, icono, texto, principal }: { a: string; icono: string; texto: string; principal?: boolean }) {
   return (
@@ -29,6 +29,7 @@ export function Inicio() {
   const faltan = dias?.diasSinCargar ?? [];
   const { datos: venc } = useCargar<{ vencimientos: Vencimiento[] }>("/vencimientos");
   const avisos = venc?.vencimientos.filter((v) => v.avisar) ?? [];
+  const { datos: panel } = useCargar<Panel>("/panel");
   const enRojo = deben?.clientes.filter((c) => c.nivel === "roja").length ?? 0;
 
   return (
@@ -46,6 +47,28 @@ export function Inicio() {
         <BotonInicio a="/gasto" icono={ICONOS.recibo} texto="Anotar gasto" />
         <BotonInicio a="/liquidacion" icono={ICONOS.personas} texto="Liquidar turno" />
       </div>
+
+      {panel && (
+        <Tarjeta>
+          <Link to="/ganancia" className="flex flex-col gap-1 p-4">
+            <span className="flex items-center justify-between">
+              <span className="text-base font-bold text-suave">Cómo va el negocio</span>
+              <span className="text-base font-bold text-azul">Ver ›</span>
+            </span>
+            <span className="text-xl">
+              {mesLargo(panel.mes_anterior.periodo).split(" ")[0]} te {panel.mes_anterior.te_quedo >= 0 ? "dejó" : "costó"}{" "}
+              <strong className="text-[26px]">{pesos(Math.abs(panel.mes_anterior.te_quedo))}</strong>
+              {panel.mes_anterior.completo ? "" : " (incompleto)"}
+            </span>
+            {panel.idea && (
+              <span className="text-suave">
+                Idea: {panel.idea.titulo.charAt(0).toLowerCase()}
+                {panel.idea.titulo.slice(1)} ({panel.idea.monto}).
+              </span>
+            )}
+          </Link>
+        </Tarjeta>
+      )}
 
       {deben && (
         <Tarjeta>
@@ -75,6 +98,14 @@ export function Inicio() {
         </Link>
       )}
 
+      {panel?.sin_rendir.map((p) => (
+        <Link key={p.nombre} to="/plata">
+          <Aviso tipo="atencion">
+            {p.nombre} tiene {pesos(p.saldo)} sin entregar desde {haceDias(Math.round((Date.parse(hoy) - Date.parse(p.desde)) / 86_400_000))}.
+          </Aviso>
+        </Link>
+      ))}
+
       {faltan.length > 0 && (
         <Link to={`/mas/viajes?fecha=${faltan[faltan.length - 1]}`}>
           <Aviso tipo="atencion">
@@ -98,6 +129,15 @@ export function Inicio() {
               En tu caja {pesos(plata.caja)} · Handy por acreditar {pesos(plata.handy)}
             </span>
           </Link>
+        </Tarjeta>
+      )}
+      {panel && (
+        <Tarjeta className="flex flex-col gap-1 p-4">
+          <span className="text-base font-bold text-suave">Hoy</span>
+          <span>
+            {panel.hoy.viajes === 1 ? "1 viaje anotado" : `${panel.hoy.viajes} viajes anotados`} · {pesos(panel.hoy.facturado)}
+          </span>
+          <span>Cobros de fiados {pesos(panel.hoy.cobros)}</span>
         </Tarjeta>
       )}
     </main>

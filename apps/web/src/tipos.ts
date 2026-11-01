@@ -260,3 +260,54 @@ export interface CuentaDelTurno {
     esperado: Centesimos;
   } | null;
 }
+
+export interface Ganancia {
+  periodo: string;
+  en_curso: boolean;
+  completo: boolean;
+  dias_sin_cargar: string[];
+  viajes_sin_liquidar: number;
+  facturado: Centesimos;
+  parte_choferes: Centesimos;
+  gastos_coches: Centesimos;
+  gastos_generales: Centesimos;
+  cuotas: Centesimos;
+  dias_del_mes: number;
+  ganancia_negocio: Centesimos;
+  te_quedo: Centesimos;
+  de_cada_100: { choferes: number; coches: number; generales: number; queda: number } | null;
+  equilibrio_por_dia: Centesimos | null;
+  real_por_dia: Centesimos;
+  por_forma: { efectivo: Centesimos; tarjeta: Centesimos; fiado: Centesimos };
+  cobrado: { efectivo: Centesimos; tarjeta_acreditada: Centesimos; cobros_de_fiados: Centesimos; total: Centesimos; deuda_crecio: Centesimos };
+  flujo: { cobrado: Centesimos; gastos_pagados: Centesimos; pagos_choferes: Centesimos; pagos_empleados: Centesimos; neto: Centesimos };
+  por_coche: {
+    id: number;
+    nombre: string;
+    facturado: Centesimos;
+    parte_choferes: Centesimos;
+    funcionamiento: Centesimos;
+    antes_de_cuota: Centesimos;
+    cuotas: Centesimos;
+    despues_de_cuota: Centesimos;
+  }[];
+}
+
+export interface Sugerencia {
+  clave: string;
+  tipo: "gana" | "pierde" | "dato";
+  titulo: string;
+  monto: string;
+  texto: string;
+  como: string;
+  enlace?: string;
+  accion?: string;
+  estado: "hecha" | "descartada" | null;
+}
+
+export interface Panel {
+  hoy: { viajes: number; facturado: Centesimos; cobros: Centesimos };
+  mes_anterior: { periodo: string; te_quedo: Centesimos; facturado: Centesimos; completo: boolean };
+  idea: Sugerencia | null;
+  sin_rendir: { nombre: string; saldo: Centesimos; desde: string }[];
+}
