@@ -57,6 +57,13 @@
       "when": 1793475815039,
       "tag": "0007_gastos",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793533614158,
+      "tag": "0008_liquidacion",
+      "breakpoints": true
     }
   ]
 }

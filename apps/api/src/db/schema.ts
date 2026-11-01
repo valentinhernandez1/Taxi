@@ -10,6 +10,7 @@
  */
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   bigint,
   bigserial,
   boolean,
@@ -213,6 +214,10 @@ export const viaje = pgTable(
     turno_id: bigint("turno_id", { mode: "number" }).references(() => turno.id),
     cliente_id: bigint("cliente_id", { mode: "number" }).references(() => cliente.id),
     recibido_por_id: bigint("recibido_por_id", { mode: "number" }).references(() => persona.id),
+    /** Liquidación del turno en que entró este viaje (nulo = todavía sin liquidar). */
+    liquidacion_id: bigint("liquidacion_id", { mode: "number" }).references((): AnyPgColumn => liquidacion.id),
+    /** Regla B: liquidación en que se le pagó al chofer su parte de este fiado, cuando el cliente pagó. */
+    parte_fiado_liquidacion_id: bigint("parte_fiado_liquidacion_id", { mode: "number" }).references((): AnyPgColumn => liquidacion.id),
     origen: origenViaje("origen").notNull().default("normal"),
     /** Para carga inicial: "Chofer anterior" u otra nota de la hoja de papel. */
     nota: text("nota"),
@@ -224,6 +229,7 @@ export const viaje = pgTable(
     uniqueIndex("viaje_op_key").on(t.op_key),
     index("viaje_fecha").on(t.fecha),
     index("viaje_cliente").on(t.cliente_id),
+    index("viaje_chofer_sin_liquidar").on(t.chofer_id).where(sql`${t.liquidacion_id} is null`),
     check("viaje_importe_positivo", sql`${t.importe} > 0`),
     check("viaje_fiado_con_cliente", sql`${t.forma_pago} <> 'fiado' or ${t.cliente_id} is not null`),
   ],
@@ -435,6 +441,8 @@ export const gasto = pgTable(
     fecha_pago: dia("fecha_pago"),
     pagado_desde: bigint("pagado_desde", { mode: "number" }).references(() => cuenta.id),
     gasto_fijo_id: bigint("gasto_fijo_id", { mode: "number" }).references(() => gastoFijo.id),
+    /** Gasto que pagó el chofer con la plata del turno, anotado en su liquidación. */
+    liquidacion_id: bigint("liquidacion_id", { mode: "number" }).references((): AnyPgColumn => liquidacion.id),
     op_key: opKey(),
     ...anulacion,
     creado_en: creadoEn(),
@@ -542,11 +550,16 @@ export const liquidacion = pgTable(
     facturado: dinero("facturado").notNull(),
     parte_chofer: dinero("parte_chofer").notNull(),
     adelantos_fiado: dinero("adelantos_fiado").notNull(),
+    /** Regla B: parte de fiados viejos que ya se cobraron, pagada en esta liquidación. */
+    parte_fiados_cobrados: dinero("parte_fiados_cobrados").notNull().default("0"),
     gastos: dinero("gastos").notNull(),
     esperado: dinero("esperado").notNull(),
     entregado: dinero("entregado").notNull(),
     diferencia: dinero("diferencia").notNull(),
     estado: estadoLiquidacion("estado").notNull().default("confirmada"),
+    nota: text("nota"),
+    anulado_en: instante("anulado_en"),
+    motivo_anulacion: text("motivo_anulacion"),
     op_key: opKey(),
     creado_en: creadoEn(),
   },

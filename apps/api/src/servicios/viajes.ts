@@ -94,6 +94,7 @@ export async function anularViaje(db: Db, usuarioId: number, id: number, motivo:
   if (!v) throw new ErrorNegocio("Ese viaje no existe", 404);
   if (v.forma_pago === "fiado") return anularFiado(db, usuarioId, id, motivo);
   if (v.anulado) return { ok: true };
+  if (v.liquidacion_id) throw new ErrorNegocio("Este viaje ya está en la liquidación de un turno. Para anularlo, primero anulá esa liquidación.");
   await db.transaction(async (tx) => {
     const [bloqueado] = await tx.select().from(viaje).where(eq(viaje.id, id)).for("update");
     if (bloqueado!.anulado) return;

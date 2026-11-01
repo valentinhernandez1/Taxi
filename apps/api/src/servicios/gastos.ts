@@ -100,7 +100,11 @@ export interface NuevoGasto {
   fecha_pago?: Dia | null;
 }
 
-async function insertarGasto(tx: DbOTx, usuarioId: number, datos: NuevoGasto & { gasto_fijo_id?: number | null }) {
+export async function insertarGasto(
+  tx: DbOTx,
+  usuarioId: number,
+  datos: NuevoGasto & { gasto_fijo_id?: number | null; liquidacion_id?: number | null },
+) {
   const [cat] = await tx.select().from(categoriaGasto).where(eq(categoriaGasto.id, datos.categoria_id));
   if (!cat?.activa) throw new ErrorNegocio("Esa categoría no existe o está dada de baja");
   if (cat.es_cuota_vehiculo && !datos.coche_id) throw new ErrorNegocio("Elegí de qué coche es la cuota");
@@ -120,6 +124,7 @@ async function insertarGasto(tx: DbOTx, usuarioId: number, datos: NuevoGasto & {
       fecha_pago: fechaPago,
       pagado_desde: cuenta,
       gasto_fijo_id: datos.gasto_fijo_id ?? null,
+      liquidacion_id: datos.liquidacion_id ?? null,
       op_key: datos.op_key,
     })
     .returning();
@@ -187,40 +192,46 @@ export async function pagarGasto(db: Db, usuarioId: number, id: number, datos: {
 }
 
 export async function anularGasto(db: Db, usuarioId: number, id: number, motivo: string) {
-  return db.transaction(async (tx) => {
-    const [g] = await tx.select().from(gasto).where(eq(gasto.id, id)).for("update");
-    if (!g) throw new ErrorNegocio("Ese gasto no existe", 404);
-    if (g.anulado) return { ok: true };
-    if (g.op_key.endsWith(":comision")) {
-      throw new ErrorNegocio("La comisión de Handy sale sola de lo que cayó al banco; no se anula a mano.");
-    }
-    await tx.update(gasto).set({ anulado: true, anulado_en: new Date(), motivo_anulacion: motivo }).where(eq(gasto.id, id));
-    await revertirMovimientos(tx, "gasto", id, hoy());
-    // Si venía de un vencimiento, ese vencimiento vuelve a quedar por pagar.
-    const [v] = await tx.select().from(vencimiento).where(eq(vencimiento.gasto_id, id));
-    if (v) {
-      await tx.update(vencimiento).set({ estado: "pendiente", gasto_id: null, importe_real: null }).where(eq(vencimiento.id, v.id));
-      await registrarAuditoria(tx, {
-        tabla: "vencimiento",
-        registroId: v.id,
-        accion: "modificar",
-        antes: { estado: v.estado, gasto_id: id },
-        despues: { estado: "pendiente", gasto_id: null },
-        motivo: `Se anuló el gasto: ${motivo}`,
-        usuarioId,
-      });
-    }
+  return db.transaction((tx) => anularGastoEn(tx, usuarioId, id, motivo, false));
+}
+
+/** Anula dentro de una transacción ya abierta; `desdeLiquidacion` = lo pide la anulación de su liquidación. */
+export async function anularGastoEn(tx: DbOTx, usuarioId: number, id: number, motivo: string, desdeLiquidacion: boolean) {
+  const [g] = await tx.select().from(gasto).where(eq(gasto.id, id)).for("update");
+  if (!g) throw new ErrorNegocio("Ese gasto no existe", 404);
+  if (g.anulado) return { ok: true };
+  if (g.op_key.endsWith(":comision")) {
+    throw new ErrorNegocio("La comisión de Handy sale sola de lo que cayó al banco; no se anula a mano.");
+  }
+  if (g.liquidacion_id && !desdeLiquidacion) {
+    throw new ErrorNegocio("Este gasto se anotó en la liquidación de un turno. Para cambiarlo, anulá esa liquidación.");
+  }
+  await tx.update(gasto).set({ anulado: true, anulado_en: new Date(), motivo_anulacion: motivo }).where(eq(gasto.id, id));
+  await revertirMovimientos(tx, "gasto", id, hoy());
+  // Si venía de un vencimiento, ese vencimiento vuelve a quedar por pagar.
+  const [v] = await tx.select().from(vencimiento).where(eq(vencimiento.gasto_id, id));
+  if (v) {
+    await tx.update(vencimiento).set({ estado: "pendiente", gasto_id: null, importe_real: null }).where(eq(vencimiento.id, v.id));
     await registrarAuditoria(tx, {
-      tabla: "gasto",
-      registroId: id,
-      accion: "anular",
-      antes: { anulado: false, importe: g.importe, estado: g.estado },
-      despues: { anulado: true },
-      motivo,
+      tabla: "vencimiento",
+      registroId: v.id,
+      accion: "modificar",
+      antes: { estado: v.estado, gasto_id: id },
+      despues: { estado: "pendiente", gasto_id: null },
+      motivo: `Se anuló el gasto: ${motivo}`,
       usuarioId,
     });
-    return { ok: true };
+  }
+  await registrarAuditoria(tx, {
+    tabla: "gasto",
+    registroId: id,
+    accion: "anular",
+    antes: { anulado: false, importe: g.importe, estado: g.estado },
+    despues: { anulado: true },
+    motivo,
+    usuarioId,
   });
+  return { ok: true };
 }
 
 /** Gastos del mes (devengados: pagados y pendientes), con las cuotas aparte. */
